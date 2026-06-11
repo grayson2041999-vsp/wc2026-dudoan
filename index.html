@@ -410,80 +410,85 @@ const DEFAULT_SCORE = '5-5'; // Tỷ số mặc định nếu không đoán trư
 //  MATCH DATA – 72 trận vòng bảng WC 2026
 //  deadline = giờ UTC trước khi trận bắt đầu
 // ══════════════════════════════════════════════
+// kickoff = giờ UTC chính xác (ET + 4h). deadline = kickoff (khoá đúng lúc bắt đầu)
 const MATCHES = [
-  {id:1,  group:"A", date:"2026-06-11", team1:"Mexico",      team2:"South Africa",        deadline:"2026-06-11T18:00:00Z"},
-  {id:2,  group:"A", date:"2026-06-11", team1:"South Korea", team2:"Czech Republic",       deadline:"2026-06-11T21:00:00Z"},
-  {id:3,  group:"B", date:"2026-06-12", team1:"Canada",      team2:"Bosnia & Herz.",       deadline:"2026-06-12T18:00:00Z"},
-  {id:4,  group:"D", date:"2026-06-12", team1:"USA",         team2:"Paraguay",             deadline:"2026-06-12T21:00:00Z"},
-  {id:5,  group:"B", date:"2026-06-13", team1:"Qatar",       team2:"Switzerland",          deadline:"2026-06-13T18:00:00Z"},
-  {id:6,  group:"C", date:"2026-06-13", team1:"Brazil",      team2:"Morocco",              deadline:"2026-06-13T21:00:00Z"},
-  {id:7,  group:"D", date:"2026-06-13", team1:"Australia",   team2:"Turkey",               deadline:"2026-06-13T00:00:00Z"},
-  {id:8,  group:"C", date:"2026-06-13", team1:"Haiti",       team2:"Scotland",             deadline:"2026-06-13T03:00:00Z"},
-  {id:9,  group:"E", date:"2026-06-14", team1:"Germany",     team2:"Curaçao",              deadline:"2026-06-14T18:00:00Z"},
-  {id:10, group:"E", date:"2026-06-14", team1:"Ivory Coast", team2:"Ecuador",              deadline:"2026-06-14T21:00:00Z"},
-  {id:11, group:"F", date:"2026-06-14", team1:"Netherlands", team2:"Japan",                deadline:"2026-06-14T00:00:00Z"},
-  {id:12, group:"F", date:"2026-06-14", team1:"Sweden",      team2:"Tunisia",              deadline:"2026-06-14T03:00:00Z"},
-  {id:13, group:"G", date:"2026-06-15", team1:"Belgium",     team2:"Egypt",                deadline:"2026-06-15T18:00:00Z"},
-  {id:14, group:"G", date:"2026-06-15", team1:"Iran",        team2:"New Zealand",          deadline:"2026-06-15T21:00:00Z"},
-  {id:15, group:"H", date:"2026-06-15", team1:"Spain",       team2:"Cape Verde",           deadline:"2026-06-15T00:00:00Z"},
-  {id:16, group:"H", date:"2026-06-15", team1:"Saudi Arabia",team2:"Uruguay",              deadline:"2026-06-15T03:00:00Z"},
-  {id:17, group:"I", date:"2026-06-16", team1:"France",      team2:"Senegal",              deadline:"2026-06-16T18:00:00Z"},
-  {id:18, group:"I", date:"2026-06-16", team1:"Iraq",        team2:"Norway",               deadline:"2026-06-16T21:00:00Z"},
-  {id:19, group:"J", date:"2026-06-16", team1:"Argentina",   team2:"Algeria",              deadline:"2026-06-16T00:00:00Z"},
-  {id:20, group:"J", date:"2026-06-16", team1:"Austria",     team2:"Jordan",               deadline:"2026-06-16T03:00:00Z"},
-  {id:21, group:"K", date:"2026-06-17", team1:"Portugal",    team2:"DR Congo",             deadline:"2026-06-17T18:00:00Z"},
-  {id:22, group:"K", date:"2026-06-17", team1:"Uzbekistan",  team2:"Colombia",             deadline:"2026-06-17T21:00:00Z"},
-  {id:23, group:"L", date:"2026-06-17", team1:"England",     team2:"Croatia",              deadline:"2026-06-17T00:00:00Z"},
-  {id:24, group:"L", date:"2026-06-17", team1:"Ghana",       team2:"Panama",               deadline:"2026-06-17T03:00:00Z"},
-  {id:25, group:"A", date:"2026-06-18", team1:"Mexico",      team2:"South Korea",          deadline:"2026-06-18T18:00:00Z"},
-  {id:26, group:"A", date:"2026-06-18", team1:"Czech Republic",team2:"South Africa",       deadline:"2026-06-18T21:00:00Z"},
-  {id:27, group:"B", date:"2026-06-18", team1:"Canada",      team2:"Qatar",                deadline:"2026-06-18T00:00:00Z"},
-  {id:28, group:"B", date:"2026-06-18", team1:"Switzerland", team2:"Bosnia & Herz.",       deadline:"2026-06-18T03:00:00Z"},
-  {id:29, group:"C", date:"2026-06-19", team1:"Brazil",      team2:"Haiti",                deadline:"2026-06-19T18:00:00Z"},
-  {id:30, group:"C", date:"2026-06-19", team1:"Scotland",    team2:"Morocco",              deadline:"2026-06-19T21:00:00Z"},
-  {id:31, group:"D", date:"2026-06-19", team1:"USA",         team2:"Australia",            deadline:"2026-06-19T00:00:00Z"},
-  {id:32, group:"D", date:"2026-06-19", team1:"Turkey",      team2:"Paraguay",             deadline:"2026-06-19T03:00:00Z"},
-  {id:33, group:"E", date:"2026-06-20", team1:"Germany",     team2:"Ivory Coast",          deadline:"2026-06-20T18:00:00Z"},
-  {id:34, group:"E", date:"2026-06-20", team1:"Ecuador",     team2:"Curaçao",              deadline:"2026-06-20T21:00:00Z"},
-  {id:35, group:"F", date:"2026-06-20", team1:"Netherlands", team2:"Sweden",               deadline:"2026-06-20T00:00:00Z"},
-  {id:36, group:"F", date:"2026-06-20", team1:"Tunisia",     team2:"Japan",                deadline:"2026-06-20T03:00:00Z"},
-  {id:37, group:"G", date:"2026-06-21", team1:"Belgium",     team2:"Iran",                 deadline:"2026-06-21T18:00:00Z"},
-  {id:38, group:"G", date:"2026-06-21", team1:"New Zealand", team2:"Egypt",                deadline:"2026-06-21T21:00:00Z"},
-  {id:39, group:"H", date:"2026-06-21", team1:"Spain",       team2:"Saudi Arabia",         deadline:"2026-06-21T00:00:00Z"},
-  {id:40, group:"H", date:"2026-06-21", team1:"Uruguay",     team2:"Cape Verde",           deadline:"2026-06-21T03:00:00Z"},
-  {id:41, group:"I", date:"2026-06-22", team1:"France",      team2:"Iraq",                 deadline:"2026-06-22T18:00:00Z"},
-  {id:42, group:"I", date:"2026-06-22", team1:"Norway",      team2:"Senegal",              deadline:"2026-06-22T21:00:00Z"},
-  {id:43, group:"J", date:"2026-06-22", team1:"Argentina",   team2:"Austria",              deadline:"2026-06-22T00:00:00Z"},
-  {id:44, group:"J", date:"2026-06-22", team1:"Jordan",      team2:"Algeria",              deadline:"2026-06-22T03:00:00Z"},
-  {id:45, group:"K", date:"2026-06-23", team1:"Portugal",    team2:"Uzbekistan",           deadline:"2026-06-23T18:00:00Z"},
-  {id:46, group:"K", date:"2026-06-23", team1:"Colombia",    team2:"DR Congo",             deadline:"2026-06-23T21:00:00Z"},
-  {id:47, group:"L", date:"2026-06-23", team1:"England",     team2:"Ghana",                deadline:"2026-06-23T00:00:00Z"},
-  {id:48, group:"L", date:"2026-06-23", team1:"Panama",      team2:"Croatia",              deadline:"2026-06-23T03:00:00Z"},
-  {id:49, group:"A", date:"2026-06-24", team1:"Czech Republic",team2:"Mexico",             deadline:"2026-06-24T18:00:00Z"},
-  {id:50, group:"A", date:"2026-06-24", team1:"South Africa",team2:"South Korea",          deadline:"2026-06-24T18:00:00Z"},
-  {id:51, group:"B", date:"2026-06-24", team1:"Switzerland", team2:"Canada",               deadline:"2026-06-24T21:00:00Z"},
-  {id:52, group:"B", date:"2026-06-24", team1:"Bosnia & Herz.",team2:"Qatar",              deadline:"2026-06-24T21:00:00Z"},
-  {id:53, group:"C", date:"2026-06-24", team1:"Scotland",    team2:"Brazil",               deadline:"2026-06-24T00:00:00Z"},
-  {id:54, group:"C", date:"2026-06-24", team1:"Haiti",       team2:"Morocco",              deadline:"2026-06-24T00:00:00Z"},
-  {id:55, group:"D", date:"2026-06-25", team1:"Turkey",      team2:"USA",                  deadline:"2026-06-25T18:00:00Z"},
-  {id:56, group:"D", date:"2026-06-25", team1:"Paraguay",    team2:"Australia",            deadline:"2026-06-25T18:00:00Z"},
-  {id:57, group:"E", date:"2026-06-25", team1:"Ecuador",     team2:"Germany",              deadline:"2026-06-25T21:00:00Z"},
-  {id:58, group:"E", date:"2026-06-25", team1:"Curaçao",     team2:"Ivory Coast",          deadline:"2026-06-25T21:00:00Z"},
-  {id:59, group:"F", date:"2026-06-25", team1:"Tunisia",     team2:"Netherlands",          deadline:"2026-06-25T00:00:00Z"},
-  {id:60, group:"F", date:"2026-06-25", team1:"Japan",       team2:"Sweden",               deadline:"2026-06-25T00:00:00Z"},
-  {id:61, group:"G", date:"2026-06-26", team1:"New Zealand", team2:"Belgium",              deadline:"2026-06-26T18:00:00Z"},
-  {id:62, group:"G", date:"2026-06-26", team1:"Egypt",       team2:"Iran",                 deadline:"2026-06-26T18:00:00Z"},
-  {id:63, group:"H", date:"2026-06-26", team1:"Uruguay",     team2:"Spain",                deadline:"2026-06-26T21:00:00Z"},
-  {id:64, group:"H", date:"2026-06-26", team1:"Cape Verde",  team2:"Saudi Arabia",         deadline:"2026-06-26T21:00:00Z"},
-  {id:65, group:"I", date:"2026-06-26", team1:"Norway",      team2:"France",               deadline:"2026-06-26T00:00:00Z"},
-  {id:66, group:"I", date:"2026-06-26", team1:"Senegal",     team2:"Iraq",                 deadline:"2026-06-26T00:00:00Z"},
-  {id:67, group:"J", date:"2026-06-27", team1:"Jordan",      team2:"Argentina",            deadline:"2026-06-27T18:00:00Z"},
-  {id:68, group:"J", date:"2026-06-27", team1:"Algeria",     team2:"Austria",              deadline:"2026-06-27T18:00:00Z"},
-  {id:69, group:"K", date:"2026-06-27", team1:"Colombia",    team2:"Portugal",             deadline:"2026-06-27T21:00:00Z"},
-  {id:70, group:"K", date:"2026-06-27", team1:"DR Congo",    team2:"Uzbekistan",           deadline:"2026-06-27T21:00:00Z"},
-  {id:71, group:"L", date:"2026-06-27", team1:"Panama",      team2:"England",              deadline:"2026-06-27T00:00:00Z"},
-  {id:72, group:"L", date:"2026-06-27", team1:"Croatia",     team2:"Ghana",                deadline:"2026-06-27T00:00:00Z"},
-];
+  {id:1,  group:"A", team1:"Mexico",           team2:"South Africa",     kickoff:"2026-06-11T19:00:00Z"},
+  {id:2,  group:"A", team1:"South Korea",      team2:"Czechia",          kickoff:"2026-06-12T02:00:00Z"},
+  {id:3,  group:"B", team1:"Canada",           team2:"Bosnia & Herz.",   kickoff:"2026-06-12T19:00:00Z"},
+  {id:4,  group:"D", team1:"USA",              team2:"Paraguay",         kickoff:"2026-06-13T01:00:00Z"},
+  {id:5,  group:"B", team1:"Qatar",            team2:"Switzerland",      kickoff:"2026-06-13T19:00:00Z"},
+  {id:6,  group:"C", team1:"Brazil",           team2:"Morocco",          kickoff:"2026-06-13T22:00:00Z"},
+  {id:7,  group:"C", team1:"Haiti",            team2:"Scotland",         kickoff:"2026-06-14T01:00:00Z"},
+  {id:8,  group:"D", team1:"Australia",        team2:"Turkey",           kickoff:"2026-06-14T04:00:00Z"},
+  {id:9,  group:"E", team1:"Germany",          team2:"Curaçao",          kickoff:"2026-06-14T17:00:00Z"},
+  {id:10, group:"F", team1:"Netherlands",      team2:"Japan",            kickoff:"2026-06-14T20:00:00Z"},
+  {id:11, group:"E", team1:"Ivory Coast",      team2:"Ecuador",          kickoff:"2026-06-14T23:00:00Z"},
+  {id:12, group:"F", team1:"Sweden",           team2:"Tunisia",          kickoff:"2026-06-15T02:00:00Z"},
+  {id:13, group:"H", team1:"Spain",            team2:"Cape Verde",       kickoff:"2026-06-15T17:00:00Z"},
+  {id:14, group:"G", team1:"Belgium",          team2:"Egypt",            kickoff:"2026-06-15T22:00:00Z"},
+  {id:15, group:"H", team1:"Saudi Arabia",     team2:"Uruguay",          kickoff:"2026-06-15T22:00:00Z"},
+  {id:16, group:"G", team1:"Iran",             team2:"New Zealand",      kickoff:"2026-06-16T04:00:00Z"},
+  {id:17, group:"I", team1:"France",           team2:"Senegal",          kickoff:"2026-06-16T19:00:00Z"},
+  {id:18, group:"I", team1:"Iraq",             team2:"Norway",           kickoff:"2026-06-16T22:00:00Z"},
+  {id:19, group:"J", team1:"Argentina",        team2:"Algeria",          kickoff:"2026-06-17T01:00:00Z"},
+  {id:20, group:"J", team1:"Austria",          team2:"Jordan",           kickoff:"2026-06-17T04:00:00Z"},
+  {id:21, group:"K", team1:"Portugal",         team2:"DR Congo",         kickoff:"2026-06-17T17:00:00Z"},
+  {id:22, group:"L", team1:"England",          team2:"Croatia",          kickoff:"2026-06-17T20:00:00Z"},
+  {id:23, group:"L", team1:"Ghana",            team2:"Panama",           kickoff:"2026-06-17T23:00:00Z"},
+  {id:24, group:"K", team1:"Uzbekistan",       team2:"Colombia",         kickoff:"2026-06-18T02:00:00Z"},
+  {id:25, group:"A", team1:"Czechia",          team2:"South Africa",     kickoff:"2026-06-18T16:00:00Z"},
+  {id:26, group:"B", team1:"Switzerland",      team2:"Bosnia & Herz.",   kickoff:"2026-06-18T19:00:00Z"},
+  {id:27, group:"B", team1:"Canada",           team2:"Qatar",            kickoff:"2026-06-18T22:00:00Z"},
+  {id:28, group:"A", team1:"Mexico",           team2:"South Korea",      kickoff:"2026-06-19T03:00:00Z"},
+  {id:29, group:"D", team1:"USA",              team2:"Australia",        kickoff:"2026-06-19T19:00:00Z"},
+  {id:30, group:"C", team1:"Scotland",         team2:"Morocco",          kickoff:"2026-06-19T22:00:00Z"},
+  {id:31, group:"C", team1:"Brazil",           team2:"Haiti",            kickoff:"2026-06-20T01:00:00Z"},
+  {id:32, group:"D", team1:"Turkey",           team2:"Paraguay",         kickoff:"2026-06-20T04:00:00Z"},
+  {id:33, group:"F", team1:"Netherlands",      team2:"Sweden",           kickoff:"2026-06-20T17:00:00Z"},
+  {id:34, group:"E", team1:"Germany",          team2:"Ivory Coast",      kickoff:"2026-06-20T20:00:00Z"},
+  {id:35, group:"E", team1:"Ecuador",          team2:"Curaçao",          kickoff:"2026-06-21T00:00:00Z"},
+  {id:36, group:"F", team1:"Tunisia",          team2:"Japan",            kickoff:"2026-06-21T04:00:00Z"},
+  {id:37, group:"H", team1:"Spain",            team2:"Saudi Arabia",     kickoff:"2026-06-21T16:00:00Z"},
+  {id:38, group:"G", team1:"Belgium",          team2:"Iran",             kickoff:"2026-06-21T19:00:00Z"},
+  {id:39, group:"H", team1:"Uruguay",          team2:"Cape Verde",       kickoff:"2026-06-21T22:00:00Z"},
+  {id:40, group:"G", team1:"New Zealand",      team2:"Egypt",            kickoff:"2026-06-22T01:00:00Z"},
+  {id:41, group:"J", team1:"Argentina",        team2:"Austria",          kickoff:"2026-06-22T17:00:00Z"},
+  {id:42, group:"I", team1:"France",           team2:"Iraq",             kickoff:"2026-06-22T21:00:00Z"},
+  {id:43, group:"I", team1:"Norway",           team2:"Senegal",          kickoff:"2026-06-23T00:00:00Z"},
+  {id:44, group:"J", team1:"Jordan",           team2:"Algeria",          kickoff:"2026-06-23T03:00:00Z"},
+  {id:45, group:"K", team1:"Portugal",         team2:"Uzbekistan",       kickoff:"2026-06-23T17:00:00Z"},
+  {id:46, group:"L", team1:"England",          team2:"Ghana",            kickoff:"2026-06-23T20:00:00Z"},
+  {id:47, group:"L", team1:"Panama",           team2:"Croatia",          kickoff:"2026-06-23T23:00:00Z"},
+  {id:48, group:"K", team1:"Colombia",         team2:"DR Congo",         kickoff:"2026-06-24T02:00:00Z"},
+  {id:49, group:"B", team1:"Switzerland",      team2:"Canada",           kickoff:"2026-06-24T19:00:00Z"},
+  {id:50, group:"B", team1:"Bosnia & Herz.",   team2:"Qatar",            kickoff:"2026-06-24T19:00:00Z"},
+  {id:51, group:"C", team1:"Scotland",         team2:"Brazil",           kickoff:"2026-06-24T22:00:00Z"},
+  {id:52, group:"C", team1:"Morocco",          team2:"Haiti",            kickoff:"2026-06-24T22:00:00Z"},
+  {id:53, group:"A", team1:"Czechia",          team2:"Mexico",           kickoff:"2026-06-25T01:00:00Z"},
+  {id:54, group:"A", team1:"South Africa",     team2:"South Korea",      kickoff:"2026-06-25T01:00:00Z"},
+  {id:55, group:"E", team1:"Ecuador",          team2:"Germany",          kickoff:"2026-06-25T20:00:00Z"},
+  {id:56, group:"E", team1:"Curaçao",          team2:"Ivory Coast",      kickoff:"2026-06-25T20:00:00Z"},
+  {id:57, group:"F", team1:"Japan",            team2:"Sweden",           kickoff:"2026-06-25T23:00:00Z"},
+  {id:58, group:"F", team1:"Tunisia",          team2:"Netherlands",      kickoff:"2026-06-25T23:00:00Z"},
+  {id:59, group:"D", team1:"Turkey",           team2:"USA",              kickoff:"2026-06-26T02:00:00Z"},
+  {id:60, group:"D", team1:"Paraguay",         team2:"Australia",        kickoff:"2026-06-26T02:00:00Z"},
+  {id:61, group:"I", team1:"Norway",           team2:"France",           kickoff:"2026-06-26T19:00:00Z"},
+  {id:62, group:"I", team1:"Senegal",          team2:"Iraq",             kickoff:"2026-06-26T19:00:00Z"},
+  {id:63, group:"H", team1:"Cape Verde",       team2:"Saudi Arabia",     kickoff:"2026-06-27T00:00:00Z"},
+  {id:64, group:"H", team1:"Uruguay",          team2:"Spain",            kickoff:"2026-06-27T00:00:00Z"},
+  {id:65, group:"G", team1:"Egypt",            team2:"Iran",             kickoff:"2026-06-27T03:00:00Z"},
+  {id:66, group:"G", team1:"New Zealand",      team2:"Belgium",          kickoff:"2026-06-27T03:00:00Z"},
+  {id:67, group:"L", team1:"Panama",           team2:"England",          kickoff:"2026-06-27T21:00:00Z"},
+  {id:68, group:"L", team1:"Croatia",          team2:"Ghana",            kickoff:"2026-06-27T21:00:00Z"},
+  {id:69, group:"K", team1:"Colombia",         team2:"Portugal",         kickoff:"2026-06-27T23:30:00Z"},
+  {id:70, group:"K", team1:"DR Congo",         team2:"Uzbekistan",       kickoff:"2026-06-27T23:30:00Z"},
+  {id:71, group:"J", team1:"Algeria",          team2:"Austria",          kickoff:"2026-06-28T02:00:00Z"},
+  {id:72, group:"J", team1:"Jordan",           team2:"Argentina",        kickoff:"2026-06-28T02:00:00Z"},
+].map(m => ({...m, deadline: m.kickoff, date: (() => {
+  // Group by VN date (UTC+7)
+  const d = new Date(new Date(m.kickoff).getTime() + 7*3600*1000);
+  return d.toISOString().slice(0,10);
+})()}));
 
 // ══════════════════════════════════════════════
 //  STATE
@@ -535,7 +540,7 @@ function listenToData() {
 //  HELPERS
 // ══════════════════════════════════════════════
 function isLocked(match) {
-  return new Date() >= new Date(match.deadline);
+  return new Date() >= new Date(match.kickoff);
 }
 function getPrediction(matchId, player) {
   return predictions[matchId]?.[player] || null;
@@ -547,8 +552,20 @@ function getEffectivePrediction(matchId, player) {
   return null;
 }
 function formatDate(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00Z');
-  return d.toLocaleDateString('vi-VN', {weekday:'short', day:'numeric', month:'numeric', timeZone:'UTC'});
+  // dateStr là VN date (UTC+7)
+  const d = new Date(dateStr + 'T00:00:00+07:00');
+  return d.toLocaleDateString('vi-VN', {weekday:'short', day:'numeric', month:'numeric'});
+}
+function formatKickoffVN(utcStr) {
+  const d = new Date(utcStr);
+  const vn = new Date(d.getTime() + 7*3600*1000);
+  const hh = String(vn.getUTCHours()).padStart(2,'0');
+  const mm = String(vn.getUTCMinutes()).padStart(2,'0');
+  const day = vn.getUTCDate();
+  const month = vn.getUTCMonth()+1;
+  const days = ['CN','T2','T3','T4','T5','T6','T7'];
+  const dow = days[vn.getUTCDay()];
+  return `${dow} ${day}/${month} lúc ${hh}:${mm}`;
 }
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -661,7 +678,7 @@ function renderMatchCard(m) {
       predHtml = `<span class="my-prediction">Tôi: <span class="score">${effectivePred}</span>${!myPred?' (tự động)':''}</span>`;
     }
   } else {
-    statusHtml = `<span class="match-status open">⏳ Đang mở</span>`;
+    statusHtml = `<span class="match-status open">🕐 ${formatKickoffVN(m.kickoff)}</span>`;
     if (myPred) {
       predHtml = `<span class="my-prediction">Tôi: <span class="score">${myPred}</span> ✏️</span>`;
     } else {
