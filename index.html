@@ -545,10 +545,15 @@ function isLocked(match) {
 function getPrediction(matchId, player) {
   return predictions[matchId]?.[player] || null;
 }
+// Người chơi "tham gia" khi đã có ít nhất 1 dự đoán bất kỳ
+function isPlayerActive(player) {
+  return Object.values(predictions).some(mp => mp?.[player]);
+}
+// Nếu đã tham gia + hết giờ + chưa đoán → 5-5. Chưa tham gia → null
 function getEffectivePrediction(matchId, player) {
   const p = getPrediction(matchId, player);
   if (p) return p;
-  if (isLocked(MATCHES.find(m=>m.id===matchId))) return DEFAULT_SCORE;
+  if (isLocked(MATCHES.find(m=>m.id===matchId)) && isPlayerActive(player)) return DEFAULT_SCORE;
   return null;
 }
 function formatDate(dateStr) {
@@ -746,7 +751,9 @@ async function submitPrediction() {
 //  LEADERBOARD
 // ══════════════════════════════════════════════
 function renderLeaderboard() {
-  const lb = PLAYERS.map(p => {
+  // Chỉ hiện người đã có ít nhất 1 dự đoán
+  const activePlayers = PLAYERS.filter(p => isPlayerActive(p));
+  const lb = activePlayers.map(p => {
     let pts = 0, correct = 0, wrong = 0;
     Object.entries(scores[p] || {}).forEach(([mid, data]) => {
       pts += data.points || 0;
@@ -833,9 +840,10 @@ async function adminSaveResult() {
     results[id] = actualScore;
   }
 
-  // Calculate scores for all players
+  // Chỉ tính điểm cho người đã tham gia (có ít nhất 1 dự đoán)
   const resultItems = [];
   for (const player of PLAYERS) {
+    if (!isPlayerActive(player)) continue; // bỏ qua người chưa tham gia
     const pred = getEffectivePrediction(id, player);
     const isCorrect = pred === actualScore;
     const pts = isCorrect ? PTS_CORRECT : PTS_WRONG;
