@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>⚽ WC 2026 – Dự đoán</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #060b1f;
+      --card: #0f1535;
+      --card2: #1a2040;
+      --accent: #f5c518;
+      --accent2: #ff6b35;
+      --green: #22c55e;
+      --red: #ef4444;
+      --text: #f0f4ff;
+      --text2: #8892b0;
+      --border: #1e2a50;
+      --r: 14px;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+      padding-bottom: 80px;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    #app-header {
+      position: sticky; top: 0; z-index: 100;
+      background: linear-gradient(135deg, #0a1128, #141c40);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    #app-header .logo { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+    #app-header .logo span { color: var(--accent); }
+    #player-badge {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 13px; font-weight: 600; color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* ── VIEWS ── */
+    .view { display: none; padding: 16px; }
+    .view.active { display: block; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--text2);
+      margin: 20px 0 10px;
+    }
+
+    /* ── PLAYER SELECT ── */
+    #view-select h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    #view-select p { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
+    .player-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .player-btn {
+      background: var(--card); border: 2px solid var(--border);
+      border-radius: var(--r); padding: 18px 12px;
+      color: var(--text); font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: all .15s;
+      text-align: center;
+    }
+    .player-btn:active { transform: scale(.96); background: var(--card2); }
+    .player-btn.selected { border-color: var(--accent); background: rgba(245,197,24,.08); color: var(--accent); }
+
+    /* ── MATCHES ── */
+    .date-group { margin-bottom: 8px; }
+    .date-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--accent);
+      padding: 12px 0 6px;
+    }
+    .match-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px;
+      margin-bottom: 8px; cursor: pointer;
+      transition: border-color .15s;
+      position: relative;
+    }
+    .match-card:active { border-color: var(--accent2); }
+    .match-card.locked { cursor: default; }
+    .match-card .group-badge {
+      position: absolute; top: 10px; right: 12px;
+      font-size: 10px; font-weight: 800; letter-spacing: 1px;
+      color: var(--text2); background: var(--card2);
+      padding: 2px 7px; border-radius: 10px;
+    }
+    .match-teams {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; margin-bottom: 10px;
+    }
+    .team-name { font-size: 15px; font-weight: 700; flex: 1; }
+    .team-name.left { text-align: right; }
+    .team-name.right { text-align: left; }
+    .vs { font-size: 12px; font-weight: 800; color: var(--text2); min-width: 24px; text-align: center; }
+    .match-meta {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .match-status {
+      font-size: 11px; font-weight: 600; padding: 3px 9px;
+      border-radius: 10px;
+    }
+    .match-status.open { background: rgba(34,197,94,.15); color: var(--green); }
+    .match-status.locked { background: rgba(239,68,68,.15); color: var(--red); }
+    .match-status.done { background: rgba(245,197,24,.15); color: var(--accent); }
+    .my-prediction {
+      font-size: 13px; font-weight: 700; color: var(--text2);
+    }
+    .my-prediction .score { color: var(--text); }
+    .my-prediction .pts-plus { color: var(--green); }
+    .my-prediction .pts-minus { color: var(--red); }
+    .actual-score {
+      font-size: 12px; color: var(--accent); font-weight: 700;
+    }
+
+    /* ── PREDICT MODAL ── */
+    #modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: center;
+    }
+    #modal-overlay.open { display: flex; }
+    #modal-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px 24px 0 0;
+      padding: 24px 20px 40px;
+      width: 100%; max-width: 480px;
+    }
+    #modal-box h3 { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+    #modal-box .modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+    .score-inputs {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-bottom: 20px;
+    }
+    .score-inputs input {
+      width: 72px; height: 72px;
+      background: var(--card2); border: 2px solid var(--border);
+      border-radius: var(--r); color: var(--text);
+      font-size: 32px; font-weight: 800; text-align: center;
+      -moz-appearance: textfield;
+    }
+    .score-inputs input::-webkit-outer-spin-button,
+    .score-inputs input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .score-inputs input:focus { outline: none; border-color: var(--accent); }
+    .score-sep { font-size: 28px; font-weight: 900; color: var(--text2); }
+    #btn-submit-pred, #btn-admin-save {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--accent), #e6a800);
+      border: none; border-radius: var(--r);
+      color: #000; font-size: 16px; font-weight: 800;
+      cursor: pointer; transition: opacity .15s;
+    }
+    #btn-submit-pred:active, #btn-admin-save:active { opacity: .85; }
+    #btn-cancel-pred {
+      width: 100%; padding: 14px;
+      background: none; border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text2);
+      font-size: 14px; cursor: pointer; margin-top: 8px;
+    }
+
+    /* ── LEADERBOARD ── */
+    .lb-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 8px;
+    }
+    .lb-rank { font-size: 18px; font-weight: 900; min-width: 28px; color: var(--text2); }
+    .lb-rank.r1 { color: #FFD700; }
+    .lb-rank.r2 { color: #C0C0C0; }
+    .lb-rank.r3 { color: #CD7F32; }
+    .lb-name { font-size: 16px; font-weight: 700; flex: 1; }
+    .lb-pts { font-size: 20px; font-weight: 900; color: var(--accent); }
+    .lb-detail { font-size: 11px; color: var(--text2); }
+    .lb-medal { font-size: 20px; min-width: 24px; text-align: center; }
+    .me-badge { font-size: 10px; background: var(--accent); color: #000; border-radius: 6px; padding: 1px 5px; font-weight: 800; vertical-align: middle; margin-left: 4px; }
+
+    /* ── ADMIN ── */
+    #view-admin input[type=password], #admin-match-select {
+      width: 100%; padding: 14px; margin-bottom: 12px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text); font-size: 15px;
+    }
+    #admin-match-select option { background: var(--card2); }
+    #btn-admin-login {
+      width: 100%; padding: 14px;
+      background: var(--accent2); border: none; border-radius: var(--r);
+      color: #fff; font-size: 16px; font-weight: 800; cursor: pointer;
+    }
+    .admin-panel { display: none; }
+    .admin-panel.open { display: block; }
+    .admin-score-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    }
+    .admin-score-row input {
+      width: 60px; height: 52px; text-align: center;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text); font-size: 22px; font-weight: 800;
+      -moz-appearance: textfield;
+    }
+    .admin-score-row input::-webkit-outer-spin-button,
+    .admin-score-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .admin-result-list { margin-top: 16px; }
+    .admin-result-item {
+      background: var(--card2); border-radius: 10px; padding: 10px 14px;
+      margin-bottom: 6px; font-size: 13px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* ── BOTTOM NAV ── */
+    #bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: #0a1128; border-top: 1px solid var(--border);
+      display: flex;
+    }
+    #bottom-nav button {
+      flex: 1; padding: 12px 8px 14px;
+      background: none; border: none; color: var(--text2);
+      font-size: 10px; font-weight: 700; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      transition: color .15s;
+    }
+    #bottom-nav button .icon { font-size: 20px; }
+    #bottom-nav button.active { color: var(--accent); }
+
+    /* ── MISC ── */
+    .empty-msg { text-align: center; color: var(--text2); padding: 40px 20px; font-size: 15px; }
+    .toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: #1e293b; color: #fff; padding: 10px 20px;
+      border-radius: 20px; font-size: 14px; font-weight: 600;
+      z-index: 999; opacity: 0; transition: opacity .3s;
+      white-space: nowrap; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    .flag { font-size: 18px; }
+    .hero-banner {
+      background: linear-gradient(135deg, #0f1535, #1a2040);
+      border: 1px solid var(--border); border-radius: var(--r);
+      padding: 20px; margin-bottom: 20px; text-align: center;
+    }
+    .hero-banner .ball { font-size: 48px; display: block; margin-bottom: 8px; }
+    .hero-banner h2 { font-size: 20px; font-weight: 900; }
+    .hero-banner p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+    #filter-bar {
+      display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto;
+      scrollbar-width: none; padding-bottom: 4px;
+    }
+    #filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      flex-shrink: 0; padding: 6px 14px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; font-size: 12px; font-weight: 700;
+      cursor: pointer; color: var(--text2); transition: all .15s;
+    }
+    .filter-chip.active { background: var(--accent); border-color: var(--accent); color: #000; }
+    .stats-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px; margin-bottom: 16px;
+    }
+    .stat-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 12px; text-align: center;
+    }
+    .stat-box .val { font-size: 22px; font-weight: 900; color: var(--accent); }
+    .stat-box .lbl { font-size: 10px; color: var(--text2); font-weight: 700; margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="app-header">
+  <div class="logo">⚽ <span>WC</span> 2026</div>
+  <div id="player-badge" onclick="switchPlayer()">Chọn tên</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════ VIEW: SELECT PLAYER ══════════════ -->
+<div id="view-select" class="view active">
+  <div class="hero-banner">
+    <span class="ball">🏆</span>
+    <h2>FIFA World Cup 2026™</h2>
+    <p>Chọn tên của bạn để bắt đầu dự đoán</p>
+  </div>
+  <p class="section-title">Danh sách người chơi</p>
+  <div class="player-grid" id="player-grid"></div>
+</div>
+
+<!-- ══════════════ VIEW: MATCHES ══════════════ -->
+<div id="view-matches" class="view">
+  <div id="filter-bar">
+    <div class="filter-chip active" data-filter="all" onclick="setFilter(this,'all')">Tất cả</div>
+    <div class="filter-chip" data-filter="open" onclick="setFilter(this,'open')">Mở</div>
+    <div class="filter-chip" data-filter="pending" onclick="setFilter(this,'pending')">Chưa đoán</div>
+    <div class="filter-chip" data-filter="done" onclick="setFilter(this,'done')">Có kết quả</div>
+  </div>
+  <div id="matches-list"></div>
+</div>
+
+<!-- ══════════════ VIEW: LEADERBOARD ══════════════ -->
+<div id="view-leaderboard" class="view">
+  <div class="stats-row" id="my-stats" style="display:none">
+    <div class="stat-box"><div class="val" id="stat-pts">0</div><div class="lbl">ĐIỂM</div></div>
+    <div class="stat-box"><div class="val" id="stat-correct">0</div><div class="lbl">ĐÚNG</div></div>
+    <div class="stat-box"><div class="val" id="stat-wrong">0</div><div class="lbl">SAI</div></div>
+  </div>
+  <p class="section-title">Bảng xếp hạng</p>
+  <div id="lb-list"></div>
+</div>
+
+<!-- ══════════════ VIEW: ADMIN ══════════════ -->
+<div id="view-admin" class="view">
+  <p class="section-title">⚙️ Quản trị viên</p>
+  <div id="admin-login-form">
+    <input type="password" id="admin-pwd-input" placeholder="Mật khẩu admin" />
+    <button id="btn-admin-login" onclick="adminLogin()">Đăng nhập</button>
+  </div>
+  <div class="admin-panel" id="admin-panel">
+    <p style="color:var(--green);font-weight:700;margin-bottom:16px;">✅ Đã đăng nhập</p>
+    <p class="section-title">Nhập kết quả trận đấu</p>
+    <select id="admin-match-select" onchange="onAdminMatchSelect()"></select>
+    <div id="admin-match-info" style="color:var(--text2);font-size:13px;margin-bottom:12px;"></div>
+    <div class="admin-score-row">
+      <span id="admin-team1" style="font-weight:700;flex:1;text-align:right;font-size:14px;"></span>
+      <input type="number" id="admin-score1" min="0" max="20" value="0">
+      <span style="font-size:20px;font-weight:900;color:var(--text2)">–</span>
+      <input type="number" id="admin-score2" min="0" max="20" value="0">
+      <span id="admin-team2" style="font-weight:700;flex:1;text-align:left;font-size:14px;"></span>
+    </div>
+    <button id="btn-admin-save" onclick="adminSaveResult()">💾 Lưu kết quả & tính điểm</button>
+    <div class="admin-result-list" id="admin-result-list"></div>
+
+    <p class="section-title" style="margin-top:24px;">Xem dự đoán theo trận</p>
+    <div id="admin-predictions-view"></div>
+  </div>
+</div>
+
+<!-- ══════════════ PREDICT MODAL ══════════════ -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal-box">
+    <h3 id="modal-match-title">Dự đoán tỷ số</h3>
+    <p class="modal-sub" id="modal-match-sub"></p>
+    <div class="score-inputs">
+      <input type="number" id="pred-score1" min="0" max="20" value="0" />
+      <span class="score-sep">–</span>
+      <input type="number" id="pred-score2" min="0" max="20" value="0" />
+    </div>
+    <button id="btn-submit-pred" onclick="submitPrediction()">✅ Xác nhận dự đoán</button>
+    <button id="btn-cancel-pred" onclick="closeModal()">Huỷ</button>
+  </div>
+</div>
+
+<!-- ══════════════ BOTTOM NAV ══════════════ -->
+<nav id="bottom-nav">
+  <button onclick="showView('matches')" id="nav-matches">
+    <span class="icon">🏆</span>Trận đấu
+  </button>
+  <button onclick="showView('leaderboard')" id="nav-leaderboard">
+    <span class="icon">📊</span>Xếp hạng
+  </button>
+  <button onclick="showView('admin')" id="nav-admin">
+    <span class="icon">⚙️</span>Admin
+  </button>
+</nav>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+// ══════════════════════════════════════════════
+//  FIREBASE CONFIG – thay bằng config của bạn
+// ══════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAGPMFBNq2fAkpd-KUxzfwJ2AKNnRPq144",
+  authDomain: "wc2026-dudoan.firebaseapp.com",
+  databaseURL: "https://wc2026-dudoan-default-rtdb.firebaseio.com",
+  projectId: "wc2026-dudoan",
+  storageBucket: "wc2026-dudoan.firebasestorage.app",
+  messagingSenderId: "115064211509",
+  appId: "1:115064211509:web:9aa7504eaabacd294c497c"
+};
+
+// ══════════════════════════════════════════════
+//  APP CONFIG
+// ══════════════════════════════════════════════
+const PLAYERS = ['Truyền','Ngân','Teliants','Phương','Trâm Anh','Đức','Thắng','Sơn','Đô','Chun','Hoàng'];
+const ADMIN_PASSWORD = 'worldcup2026'; // ← Đổi mật khẩu admin tại đây
+const PTS_CORRECT = 100;
+const PTS_WRONG = -20;
+const DEFAULT_SCORE = '5-5'; // Tỷ số mặc định nếu không đoán trước deadline
+
+// ══════════════════════════════════════════════
+//  MATCH DATA – 72 trận vòng bảng WC 2026
+//  deadline = giờ UTC trước khi trận bắt đầu
+// ══════════════════════════════════════════════
+const MATCHES = [
+  {id:1,  group:"A", date:"2026-06-11", team1:"Mexico",      team2:"South Africa",        deadline:"2026-06-11T18:00:00Z"},
+  {id:2,  group:"A", date:"2026-06-11", team1:"South Korea", team2:"Czech Republic",       deadline:"2026-06-11T21:00:00Z"},
+  {id:3,  group:"B", date:"2026-06-12", team1:"Canada",      team2:"Bosnia & Herz.",       deadline:"2026-06-12T18:00:00Z"},
+  {id:4,  group:"D", date:"2026-06-12", team1:"USA",         team2:"Paraguay",             deadline:"2026-06-12T21:00:00Z"},
+  {id:5,  group:"B", date:"2026-06-13", team1:"Qatar",       team2:"Switzerland",          deadline:"2026-06-13T18:00:00Z"},
+  {id:6,  group:"C", date:"2026-06-13", team1:"Brazil",      team2:"Morocco",              deadline:"2026-06-13T21:00:00Z"},
+  {id:7,  group:"D", date:"2026-06-13", team1:"Australia",   team2:"Turkey",               deadline:"2026-06-13T00:00:00Z"},
+  {id:8,  group:"C", date:"2026-06-13", team1:"Haiti",       team2:"Scotland",             deadline:"2026-06-13T03:00:00Z"},
+  {id:9,  group:"E", date:"2026-06-14", team1:"Germany",     team2:"Curaçao",              deadline:"2026-06-14T18:00:00Z"},
+  {id:10, group:"E", date:"2026-06-14", team1:"Ivory Coast", team2:"Ecuador",              deadline:"2026-06-14T21:00:00Z"},
+  {id:11, group:"F", date:"2026-06-14", team1:"Netherlands", team2:"Japan",                deadline:"2026-06-14T00:00:00Z"},
+  {id:12, group:"F", date:"2026-06-14", team1:"Sweden",      team2:"Tunisia",              deadline:"2026-06-14T03:00:00Z"},
+  {id:13, group:"G", date:"2026-06-15", team1:"Belgium",     team2:"Egypt",                deadline:"2026-06-15T18:00:00Z"},
+  {id:14, group:"G", date:"2026-06-15", team1:"Iran",        team2:"New Zealand",          deadline:"2026-06-15T21:00:00Z"},
+  {id:15, group:"H", date:"2026-06-15", team1:"Spain",       team2:"Cape Verde",           deadline:"2026-06-15T00:00:00Z"},
+  {id:16, group:"H", date:"2026-06-15", team1:"Saudi Arabia",team2:"Uruguay",              deadline:"2026-06-15T03:00:00Z"},
+  {id:17, group:"I", date:"2026-06-16", team1:"France",      team2:"Senegal",              deadline:"2026-06-16T18:00:00Z"},
+  {id:18, group:"I", date:"2026-06-16", team1:"Iraq",        team2:"Norway",               deadline:"2026-06-16T21:00:00Z"},
+  {id:19, group:"J", date:"2026-06-16", team1:"Argentina",   team2:"Algeria",              deadline:"2026-06-16T00:00:00Z"},
+  {id:20, group:"J", date:"2026-06-16", team1:"Austria",     team2:"Jordan",               deadline:"2026-06-16T03:00:00Z"},
+  {id:21, group:"K", date:"2026-06-17", team1:"Portugal",    team2:"DR Congo",             deadline:"2026-06-17T18:00:00Z"},
+  {id:22, group:"K", date:"2026-06-17", team1:"Uzbekistan",  team2:"Colombia",             deadline:"2026-06-17T21:00:00Z"},
+  {id:23, group:"L", date:"2026-06-17", team1:"England",     team2:"Croatia",              deadline:"2026-06-17T00:00:00Z"},
+  {id:24, group:"L", date:"2026-06-17", team1:"Ghana",       team2:"Panama",               deadline:"2026-06-17T03:00:00Z"},
+  {id:25, group:"A", date:"2026-06-18", team1:"Mexico",      team2:"South Korea",          deadline:"2026-06-18T18:00:00Z"},
+  {id:26, group:"A", date:"2026-06-18", team1:"Czech Republic",team2:"South Africa",       deadline:"2026-06-18T21:00:00Z"},
+  {id:27, group:"B", date:"2026-06-18", team1:"Canada",      team2:"Qatar",                deadline:"2026-06-18T00:00:00Z"},
+  {id:28, group:"B", date:"2026-06-18", team1:"Switzerland", team2:"Bosnia & Herz.",       deadline:"2026-06-18T03:00:00Z"},
+  {id:29, group:"C", date:"2026-06-19", team1:"Brazil",      team2:"Haiti",                deadline:"2026-06-19T18:00:00Z"},
+  {id:30, group:"C", date:"2026-06-19", team1:"Scotland",    team2:"Morocco",              deadline:"2026-06-19T21:00:00Z"},
+  {id:31, group:"D", date:"2026-06-19", team1:"USA",         team2:"Australia",            deadline:"2026-06-19T00:00:00Z"},
+  {id:32, group:"D", date:"2026-06-19", team1:"Turkey",      team2:"Paraguay",             deadline:"2026-06-19T03:00:00Z"},
+  {id:33, group:"E", date:"2026-06-20", team1:"Germany",     team2:"Ivory Coast",          deadline:"2026-06-20T18:00:00Z"},
+  {id:34, group:"E", date:"2026-06-20", team1:"Ecuador",     team2:"Curaçao",              deadline:"2026-06-20T21:00:00Z"},
+  {id:35, group:"F", date:"2026-06-20", team1:"Netherlands", team2:"Sweden",               deadline:"2026-06-20T00:00:00Z"},
+  {id:36, group:"F", date:"2026-06-20", team1:"Tunisia",     team2:"Japan",                deadline:"2026-06-20T03:00:00Z"},
+  {id:37, group:"G", date:"2026-06-21", team1:"Belgium",     team2:"Iran",                 deadline:"2026-06-21T18:00:00Z"},
+  {id:38, group:"G", date:"2026-06-21", team1:"New Zealand", team2:"Egypt",                deadline:"2026-06-21T21:00:00Z"},
+  {id:39, group:"H", date:"2026-06-21", team1:"Spain",       team2:"Saudi Arabia",         deadline:"2026-06-21T00:00:00Z"},
+  {id:40, group:"H", date:"2026-06-21", team1:"Uruguay",     team2:"Cape Verde",           deadline:"2026-06-21T03:00:00Z"},
+  {id:41, group:"I", date:"2026-06-22", team1:"France",      team2:"Iraq",                 deadline:"2026-06-22T18:00:00Z"},
+  {id:42, group:"I", date:"2026-06-22", team1:"Norway",      team2:"Senegal",              deadline:"2026-06-22T21:00:00Z"},
+  {id:43, group:"J", date:"2026-06-22", team1:"Argentina",   team2:"Austria",              deadline:"2026-06-22T00:00:00Z"},
+  {id:44, group:"J", date:"2026-06-22", team1:"Jordan",      team2:"Algeria",              deadline:"2026-06-22T03:00:00Z"},
+  {id:45, group:"K", date:"2026-06-23", team1:"Portugal",    team2:"Uzbekistan",           deadline:"2026-06-23T18:00:00Z"},
+  {id:46, group:"K", date:"2026-06-23", team1:"Colombia",    team2:"DR Congo",             deadline:"2026-06-23T21:00:00Z"},
+  {id:47, group:"L", date:"2026-06-23", team1:"England",     team2:"Ghana",                deadline:"2026-06-23T00:00:00Z"},
+  {id:48, group:"L", date:"2026-06-23", team1:"Panama",      team2:"Croatia",              deadline:"2026-06-23T03:00:00Z"},
+  {id:49, group:"A", date:"2026-06-24", team1:"Czech Republic",team2:"Mexico",             deadline:"2026-06-24T18:00:00Z"},
+  {id:50, group:"A", date:"2026-06-24", team1:"South Africa",team2:"South Korea",          deadline:"2026-06-24T18:00:00Z"},
+  {id:51, group:"B", date:"2026-06-24", team1:"Switzerland", team2:"Canada",               deadline:"2026-06-24T21:00:00Z"},
+  {id:52, group:"B", date:"2026-06-24", team1:"Bosnia & Herz.",team2:"Qatar",              deadline:"2026-06-24T21:00:00Z"},
+  {id:53, group:"C", date:"2026-06-24", team1:"Scotland",    team2:"Brazil",               deadline:"2026-06-24T00:00:00Z"},
+  {id:54, group:"C", date:"2026-06-24", team1:"Haiti",       team2:"Morocco",              deadline:"2026-06-24T00:00:00Z"},
+  {id:55, group:"D", date:"2026-06-25", team1:"Turkey",      team2:"USA",                  deadline:"2026-06-25T18:00:00Z"},
+  {id:56, group:"D", date:"2026-06-25", team1:"Paraguay",    team2:"Australia",            deadline:"2026-06-25T18:00:00Z"},
+  {id:57, group:"E", date:"2026-06-25", team1:"Ecuador",     team2:"Germany",              deadline:"2026-06-25T21:00:00Z"},
+  {id:58, group:"E", date:"2026-06-25", team1:"Curaçao",     team2:"Ivory Coast",          deadline:"2026-06-25T21:00:00Z"},
+  {id:59, group:"F", date:"2026-06-25", team1:"Tunisia",     team2:"Netherlands",          deadline:"2026-06-25T00:00:00Z"},
+  {id:60, group:"F", date:"2026-06-25", team1:"Japan",       team2:"Sweden",               deadline:"2026-06-25T00:00:00Z"},
+  {id:61, group:"G", date:"2026-06-26", team1:"New Zealand", team2:"Belgium",              deadline:"2026-06-26T18:00:00Z"},
+  {id:62, group:"G", date:"2026-06-26", team1:"Egypt",       team2:"Iran",                 deadline:"2026-06-26T18:00:00Z"},
+  {id:63, group:"H", date:"2026-06-26", team1:"Uruguay",     team2:"Spain",                deadline:"2026-06-26T21:00:00Z"},
+  {id:64, group:"H", date:"2026-06-26", team1:"Cape Verde",  team2:"Saudi Arabia",         deadline:"2026-06-26T21:00:00Z"},
+  {id:65, group:"I", date:"2026-06-26", team1:"Norway",      team2:"France",               deadline:"2026-06-26T00:00:00Z"},
+  {id:66, group:"I", date:"2026-06-26", team1:"Senegal",     team2:"Iraq",                 deadline:"2026-06-26T00:00:00Z"},
+  {id:67, group:"J", date:"2026-06-27", team1:"Jordan",      team2:"Argentina",            deadline:"2026-06-27T18:00:00Z"},
+  {id:68, group:"J", date:"2026-06-27", team1:"Algeria",     team2:"Austria",              deadline:"2026-06-27T18:00:00Z"},
+  {id:69, group:"K", date:"2026-06-27", team1:"Colombia",    team2:"Portugal",             deadline:"2026-06-27T21:00:00Z"},
+  {id:70, group:"K", date:"2026-06-27", team1:"DR Congo",    team2:"Uzbekistan",           deadline:"2026-06-27T21:00:00Z"},
+  {id:71, group:"L", date:"2026-06-27", team1:"Panama",      team2:"England",              deadline:"2026-06-27T00:00:00Z"},
+  {id:72, group:"L", date:"2026-06-27", team1:"Croatia",     team2:"Ghana",                deadline:"2026-06-27T00:00:00Z"},
+];
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let currentPlayer = localStorage.getItem('wc2026_player') || null;
+let currentFilter = 'all';
+let activeMatchId = null;
+let isAdmin = false;
+let db = null;
+let firebaseOK = false;
+
+// cache
+let predictions = {}; // {matchId: {playerName: score}}
+let results = {};     // {matchId: "2-1"}
+let scores = {};      // {playerName: {pts, correct, wrong}}
+
+// ══════════════════════════════════════════════
+//  FIREBASE INIT
+// ══════════════════════════════════════════════
+function initFirebase() {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    firebaseOK = true;
+    listenToData();
+  } catch(e) {
+    console.warn('Firebase not configured:', e.message);
+    showToast('⚠️ Chưa cấu hình Firebase – chạy offline');
+  }
+}
+
+function listenToData() {
+  if (!firebaseOK) return;
+  db.ref('predictions').on('value', snap => {
+    predictions = snap.val() || {};
+    renderCurrentView();
+  });
+  db.ref('results').on('value', snap => {
+    results = snap.val() || {};
+    renderCurrentView();
+  });
+  db.ref('scores').on('value', snap => {
+    scores = snap.val() || {};
+    renderCurrentView();
+  });
+}
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function isLocked(match) {
+  return new Date() >= new Date(match.deadline);
+}
+function getPrediction(matchId, player) {
+  return predictions[matchId]?.[player] || null;
+}
+function getEffectivePrediction(matchId, player) {
+  const p = getPrediction(matchId, player);
+  if (p) return p;
+  if (isLocked(MATCHES.find(m=>m.id===matchId))) return DEFAULT_SCORE;
+  return null;
+}
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  return d.toLocaleDateString('vi-VN', {weekday:'short', day:'numeric', month:'numeric', timeZone:'UTC'});
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function renderCurrentView() {
+  const active = document.querySelector('.view.active');
+  if (!active) return;
+  const id = active.id;
+  if (id === 'view-matches') renderMatches();
+  if (id === 'view-leaderboard') renderLeaderboard();
+  if (id === 'view-admin') renderAdminPredictions();
+}
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('#bottom-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + name)?.classList.add('active');
+  if (name === 'matches') renderMatches();
+  if (name === 'leaderboard') renderLeaderboard();
+  if (name === 'admin') renderAdminMatchSelect();
+}
+function switchPlayer() {
+  currentPlayer = null;
+  localStorage.removeItem('wc2026_player');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-select').classList.add('active');
+  document.getElementById('player-badge').textContent = 'Chọn tên';
+  document.getElementById('bottom-nav').style.display = 'none';
+  renderPlayerGrid();
+}
+
+// ══════════════════════════════════════════════
+//  PLAYER SELECT
+// ══════════════════════════════════════════════
+function renderPlayerGrid() {
+  const grid = document.getElementById('player-grid');
+  grid.innerHTML = PLAYERS.map(p => `
+    <button class="player-btn ${p===currentPlayer?'selected':''}" onclick="selectPlayer('${p}')">${p}</button>
+  `).join('');
+}
+function selectPlayer(name) {
+  currentPlayer = name;
+  localStorage.setItem('wc2026_player', name);
+  document.getElementById('player-badge').textContent = name;
+  document.getElementById('bottom-nav').style.display = 'flex';
+  showView('matches');
+}
+
+// ══════════════════════════════════════════════
+//  MATCHES VIEW
+// ══════════════════════════════════════════════
+function setFilter(el, filter) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = filter;
+  renderMatches();
+}
+function renderMatches() {
+  if (!currentPlayer) return;
+  let filtered = MATCHES;
+  const now = new Date();
+  if (currentFilter === 'open') filtered = MATCHES.filter(m => !isLocked(m) && !results[m.id]);
+  if (currentFilter === 'done') filtered = MATCHES.filter(m => results[m.id]);
+  if (currentFilter === 'pending') filtered = MATCHES.filter(m => !isLocked(m) && !getPrediction(m.id, currentPlayer));
+
+  // Group by date
+  const byDate = {};
+  filtered.forEach(m => {
+    if (!byDate[m.date]) byDate[m.date] = [];
+    byDate[m.date].push(m);
+  });
+
+  const container = document.getElementById('matches-list');
+  if (filtered.length === 0) {
+    container.innerHTML = '<p class="empty-msg">Không có trận nào</p>';
+    return;
+  }
+  container.innerHTML = Object.entries(byDate).map(([date, matches]) => `
+    <div class="date-group">
+      <div class="date-label">📅 ${formatDate(date)}</div>
+      ${matches.map(m => renderMatchCard(m)).join('')}
+    </div>
+  `).join('');
+}
+function renderMatchCard(m) {
+  const locked = isLocked(m);
+  const hasResult = results[m.id];
+  const myPred = getPrediction(m.id, currentPlayer);
+  const effectivePred = getEffectivePrediction(m.id, currentPlayer);
+
+  let statusHtml, predHtml = '', resultHtml = '';
+
+  if (hasResult) {
+    statusHtml = `<span class="match-status done">✅ Kết quả: ${hasResult}</span>`;
+    if (effectivePred) {
+      const pts = scores[currentPlayer]?.[m.id]?.points ?? '?';
+      const ptsClass = pts > 0 ? 'pts-plus' : (pts < 0 ? 'pts-minus' : '');
+      predHtml = `<span class="my-prediction">Tôi: <span class="score">${effectivePred}</span> <span class="${ptsClass}">(${pts > 0 ? '+' : ''}${pts}đ)</span></span>`;
+    }
+  } else if (locked) {
+    statusHtml = `<span class="match-status locked">🔒 Hết giờ đoán</span>`;
+    if (effectivePred) {
+      predHtml = `<span class="my-prediction">Tôi: <span class="score">${effectivePred}</span>${!myPred?' (tự động)':''}</span>`;
+    }
+  } else {
+    statusHtml = `<span class="match-status open">⏳ Đang mở</span>`;
+    if (myPred) {
+      predHtml = `<span class="my-prediction">Tôi: <span class="score">${myPred}</span> ✏️</span>`;
+    } else {
+      predHtml = `<span class="my-prediction" style="color:var(--accent2)">Chưa đoán</span>`;
+    }
+  }
+
+  const clickable = !locked || !hasResult;
+  return `
+    <div class="match-card ${locked?'locked':''}" ${!locked ? `onclick="openModal(${m.id})"` : ''}>
+      <span class="group-badge">Bảng ${m.group}</span>
+      <div class="match-teams">
+        <span class="team-name left">${m.team1}</span>
+        <span class="vs">VS</span>
+        <span class="team-name right">${m.team2}</span>
+      </div>
+      <div class="match-meta">
+        ${statusHtml}
+        ${predHtml}
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════
+//  PREDICT MODAL
+// ══════════════════════════════════════════════
+function openModal(matchId) {
+  const m = MATCHES.find(x => x.id === matchId);
+  if (!m || isLocked(m)) return;
+  activeMatchId = matchId;
+  document.getElementById('modal-match-title').textContent = `${m.team1} vs ${m.team2}`;
+  document.getElementById('modal-match-sub').textContent = `Bảng ${m.group} · ${formatDate(m.date)}`;
+  const existing = getPrediction(matchId, currentPlayer);
+  const [g1, g2] = existing ? existing.split('-') : ['0','0'];
+  document.getElementById('pred-score1').value = g1;
+  document.getElementById('pred-score2').value = g2;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  activeMatchId = null;
+}
+async function submitPrediction() {
+  if (!currentPlayer || !activeMatchId) return;
+  const m = MATCHES.find(x => x.id === activeMatchId);
+  if (!m || isLocked(m)) return;
+  const s1 = parseInt(document.getElementById('pred-score1').value) || 0;
+  const s2 = parseInt(document.getElementById('pred-score2').value) || 0;
+  const score = `${s1}-${s2}`;
+  if (firebaseOK) {
+    await db.ref(`predictions/${activeMatchId}/${currentPlayer}`).set(score);
+  } else {
+    if (!predictions[activeMatchId]) predictions[activeMatchId] = {};
+    predictions[activeMatchId][currentPlayer] = score;
+  }
+  document.getElementById('modal-overlay').classList.remove('open');
+  activeMatchId = null;
+  showToast(`✅ Đã đoán ${score}`);
+  renderMatches();
+}
+
+// ══════════════════════════════════════════════
+//  LEADERBOARD
+// ══════════════════════════════════════════════
+function renderLeaderboard() {
+  const lb = PLAYERS.map(p => {
+    let pts = 0, correct = 0, wrong = 0;
+    Object.entries(scores[p] || {}).forEach(([mid, data]) => {
+      pts += data.points || 0;
+      if (data.points === PTS_CORRECT) correct++;
+      if (data.points === PTS_WRONG) wrong++;
+    });
+    return {name: p, pts, correct, wrong};
+  }).sort((a,b) => b.pts - a.pts || b.correct - a.correct);
+
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('lb-list').innerHTML = lb.map((p, i) => {
+    const isMe = p.name === currentPlayer;
+    return `
+      <div class="lb-card">
+        <div class="lb-rank r${i+1}">${i < 3 ? medals[i] : i+1}</div>
+        <div>
+          <div class="lb-name">${p.name}${isMe ? '<span class="me-badge">Bạn</span>' : ''}</div>
+          <div class="lb-detail">✅ ${p.correct} đúng · ❌ ${p.wrong} sai</div>
+        </div>
+        <div class="lb-pts">${p.pts}</div>
+      </div>
+    `;
+  }).join('');
+
+  // My stats
+  const me = lb.find(p => p.name === currentPlayer);
+  if (me && currentPlayer) {
+    document.getElementById('my-stats').style.display = 'grid';
+    document.getElementById('stat-pts').textContent = me.pts;
+    document.getElementById('stat-correct').textContent = me.correct;
+    document.getElementById('stat-wrong').textContent = me.wrong;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════════
+function adminLogin() {
+  const pwd = document.getElementById('admin-pwd-input').value;
+  if (pwd === ADMIN_PASSWORD) {
+    isAdmin = true;
+    document.getElementById('admin-login-form').style.display = 'none';
+    document.getElementById('admin-panel').classList.add('open');
+    renderAdminMatchSelect();
+  } else {
+    showToast('❌ Sai mật khẩu');
+  }
+}
+function renderAdminMatchSelect() {
+  if (!isAdmin) return;
+  const sel = document.getElementById('admin-match-select');
+  sel.innerHTML = '<option value="">-- Chọn trận đấu --</option>' +
+    MATCHES.map(m => `<option value="${m.id}">[${m.group}] ${m.team1} vs ${m.team2} (${formatDate(m.date)})${results[m.id] ? ' ✅' : ''}</option>`).join('');
+}
+function onAdminMatchSelect() {
+  const id = parseInt(document.getElementById('admin-match-select').value);
+  if (!id) return;
+  const m = MATCHES.find(x => x.id === id);
+  document.getElementById('admin-team1').textContent = m.team1;
+  document.getElementById('admin-team2').textContent = m.team2;
+  if (results[id]) {
+    const [s1,s2] = results[id].split('-');
+    document.getElementById('admin-score1').value = s1;
+    document.getElementById('admin-score2').value = s2;
+  } else {
+    document.getElementById('admin-score1').value = 0;
+    document.getElementById('admin-score2').value = 0;
+  }
+  document.getElementById('admin-match-info').textContent =
+    `Bảng ${m.group} · ${formatDate(m.date)} · Deadline: ${new Date(m.deadline).toLocaleString('vi-VN')}`;
+  renderAdminPredictions();
+}
+async function adminSaveResult() {
+  const id = parseInt(document.getElementById('admin-match-select').value);
+  if (!id) { showToast('Chọn trận trước'); return; }
+  const s1 = parseInt(document.getElementById('admin-score1').value) || 0;
+  const s2 = parseInt(document.getElementById('admin-score2').value) || 0;
+  const actualScore = `${s1}-${s2}`;
+
+  // Save result
+  if (firebaseOK) {
+    await db.ref(`results/${id}`).set(actualScore);
+  } else {
+    results[id] = actualScore;
+  }
+
+  // Calculate scores for all players
+  const resultItems = [];
+  for (const player of PLAYERS) {
+    const pred = getEffectivePrediction(id, player);
+    const isCorrect = pred === actualScore;
+    const pts = isCorrect ? PTS_CORRECT : PTS_WRONG;
+    const data = {predicted: pred || DEFAULT_SCORE, actual: actualScore, points: pts};
+    if (firebaseOK) {
+      await db.ref(`scores/${player}/${id}`).set(data);
+    } else {
+      if (!scores[player]) scores[player] = {};
+      scores[player][id] = data;
+    }
+    resultItems.push({player, pred: pred || DEFAULT_SCORE, pts, isCorrect});
+  }
+
+  // Show results
+  document.getElementById('admin-result-list').innerHTML =
+    resultItems.map(r => `
+      <div class="admin-result-item">
+        <span>${r.player}</span>
+        <span>${r.pred}</span>
+        <span style="color:${r.isCorrect?'var(--green)':'var(--red)'};font-weight:800">${r.isCorrect?'✅':''} ${r.pts > 0 ? '+' : ''}${r.pts}đ</span>
+      </div>
+    `).join('');
+
+  showToast(`✅ Đã lưu kết quả ${actualScore}`);
+  renderAdminMatchSelect();
+}
+function renderAdminPredictions() {
+  if (!isAdmin) return;
+  const id = parseInt(document.getElementById('admin-match-select').value);
+  if (!id) return;
+  const m = MATCHES.find(x => x.id === id);
+  const actual = results[id];
+  const html = PLAYERS.map(p => {
+    const pred = getEffectivePrediction(id, p) || '—';
+    const pData = predictions[id]?.[p];
+    const isAuto = !pData && isLocked(m);
+    const score = scores[p]?.[id];
+    const pts = score ? `<span style="color:${score.points>0?'var(--green)':'var(--red)'};font-weight:800">${score.points>0?'+':''}${score.points}đ</span>` : '';
+    return `<div class="admin-result-item">
+      <span>${p}</span>
+      <span>${pred}${isAuto?' <em style="color:var(--text2);font-size:11px">(auto)</em>':''}</span>
+      ${pts}
+    </div>`;
+  }).join('');
+  document.getElementById('admin-predictions-view').innerHTML =
+    `<p style="font-size:12px;color:var(--text2);margin-bottom:8px">Dự đoán của mọi người:</p>${html}`;
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  initFirebase();
+  renderPlayerGrid();
+  if (currentPlayer) {
+    document.getElementById('player-badge').textContent = currentPlayer;
+    document.getElementById('bottom-nav').style.display = 'flex';
+    showView('matches');
+  } else {
+    document.getElementById('bottom-nav').style.display = 'none';
+  }
+});
+
+// Enter key để submit password
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('admin-pwd-input') === document.activeElement) adminLogin();
+});
+</script>
+</body>
+</html>
