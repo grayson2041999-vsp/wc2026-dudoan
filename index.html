@@ -247,6 +247,22 @@
       white-space: nowrap; pointer-events: none;
     }
     .toast.show { opacity: 1; }
+    .pred-count {
+      font-size: 12px; font-weight: 700; color: var(--text2);
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 3px 9px; cursor: pointer;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .pred-count:active { background: var(--border); }
+    .predictor-list {
+      margin-top: 10px; flex-wrap: wrap; gap: 6px;
+      border-top: 1px solid var(--border); padding-top: 10px;
+    }
+    .predictor-chip {
+      font-size: 12px; font-weight: 600; padding: 4px 10px;
+      background: var(--card2); border-radius: 10px; color: var(--text2);
+    }
+    .predictor-chip.me { background: rgba(245,197,24,.15); color: var(--accent); }
     .flag { font-size: 18px; }
     .hero-banner {
       background: linear-gradient(135deg, #0f1535, #1a2040);
@@ -691,7 +707,12 @@ function renderMatchCard(m) {
     }
   }
 
-  const clickable = !locked || !hasResult;
+  // Số người đã dự đoán
+  const predictors = PLAYERS.filter(p => getPrediction(m.id, p));
+  const predCount = predictors.length;
+  const predCountHtml = `<span class="pred-count" onclick="togglePredictors(event,${m.id})" title="Xem ai đã đoán">👥 ${predCount}/${PLAYERS.length}</span>`;
+  const predictorListHtml = `<div class="predictor-list" id="predictors-${m.id}" style="display:none">${predictors.map(p=>`<span class="predictor-chip ${p===currentPlayer?'me':''}">${p}</span>`).join('')}${predictors.length===0?'<span style="color:var(--text2);font-size:12px">Chưa ai đoán</span>':''}</div>`;
+
   return `
     <div class="match-card ${locked?'locked':''}" ${!locked ? `onclick="openModal(${m.id})"` : ''}>
       <span class="group-badge">Bảng ${m.group}</span>
@@ -702,10 +723,17 @@ function renderMatchCard(m) {
       </div>
       <div class="match-meta">
         ${statusHtml}
-        ${predHtml}
+        <div style="display:flex;align-items:center;gap:8px">${predCountHtml}${predHtml}</div>
       </div>
+      ${predictorListHtml}
     </div>
   `;
+}
+
+function togglePredictors(e, matchId) {
+  e.stopPropagation();
+  const el = document.getElementById('predictors-' + matchId);
+  if (el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';
 }
 
 // ══════════════════════════════════════════════
