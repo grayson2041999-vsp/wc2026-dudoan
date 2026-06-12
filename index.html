@@ -798,7 +798,9 @@ function renderMatchCard(m) {
       const pts = scores[currentPlayer]?.[m.id]?.points ?? '?';
       const ptsClass = pts > 0 ? 'pts-plus' : (pts < 0 ? 'pts-minus' : '');
       const correctData = scores[currentPlayer]?.[m.id];
-      const resultMark = correctData ? (correctData.correct ? `<span style="color:var(--green)"> ${t('correctLabel')}</span>` : `<span style="color:var(--red)"> ${t('wrongLabel')}</span>`) : '';
+      const isC = correctData && (correctData.correct === true || correctData.points === 100);
+      const isW = correctData && (correctData.correct === false || correctData.points === -20);
+      const resultMark = correctData ? (isC ? `<span style="color:var(--green)"> ${t('correctLabel')}</span>` : `<span style="color:var(--red)"> ${t('wrongLabel')}</span>`) : '';
       predHtml = `<span class="my-prediction">${t('myPred')}: <span class="score">${effectivePred}</span>${resultMark}</span>`;
     }
   } else if (locked) {
@@ -892,8 +894,11 @@ function renderLeaderboard() {
   const lb = activePlayers.map(p => {
     let correct = 0, wrong = 0;
     Object.entries(scores[p] || {}).forEach(([mid, data]) => {
-      if (data.correct === true) correct++;
-      else if (data.correct === false) wrong++;
+      // Hỗ trợ cả format cũ (points) và mới (correct)
+      const isCorrect = data.correct === true || data.points === 100;
+      const isWrong = data.correct === false || data.points === -20;
+      if (isCorrect) correct++;
+      else if (isWrong) wrong++;
     });
     return {name: p, correct, wrong, total: correct + wrong};
   }).sort((a,b) => b.correct - a.correct || a.wrong - b.wrong);
@@ -1017,7 +1022,8 @@ function renderAdminPredictions() {
     const pData = predictions[id]?.[p];
     const isAuto = !pData && isLocked(m);
     const scoreData = scores[p]?.[id];
-    const resultTag = scoreData ? `<span style="color:${scoreData.correct?'var(--green)':'var(--red)'};font-weight:800">${scoreData.correct?t('correctLabel'):t('wrongLabel')}</span>` : '';
+    const isC2 = scoreData && (scoreData.correct === true || scoreData.points === 100);
+    const resultTag = scoreData ? `<span style="color:${isC2?'var(--green)':'var(--red)'};font-weight:800">${isC2?t('correctLabel'):t('wrongLabel')}</span>` : '';
     return `<div class="admin-result-item">
       <span>${p}</span>
       <span>${pred}${isAuto?' <em style="color:var(--text2);font-size:11px">'+t('auto')+'</em>':''}</span>
