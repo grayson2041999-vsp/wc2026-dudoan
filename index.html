@@ -529,6 +529,47 @@ function applyLang() {
 }
 
 // ══════════════════════════════════════════════
+//  TÊN ĐỘI – VI / RU
+// ══════════════════════════════════════════════
+const TEAM_NAMES = {
+  vi: {
+    'Mexico':'Mê-hi-cô','South Africa':'Nam Phi','South Korea':'Hàn Quốc',
+    'Czechia':'Séc','Canada':'Canada','Bosnia & Herz.':'Bosnia & Herz.',
+    'USA':'Mỹ','Paraguay':'Paraguay','Qatar':'Qatar','Switzerland':'Thụy Sĩ',
+    'Brazil':'Brazil','Morocco':'Ma-rốc','Haiti':'Haiti','Scotland':'Scotland',
+    'Australia':'Úc','Turkey':'Thổ Nhĩ Kỳ','Germany':'Đức','Curaçao':'Curaçao',
+    'Netherlands':'Hà Lan','Japan':'Nhật Bản','Ivory Coast':'Bờ Biển Ngà',
+    'Ecuador':'Ecuador','Sweden':'Thụy Điển','Tunisia':'Tunisia',
+    'Spain':'Tây Ban Nha','Cape Verde':'Cape Verde','Belgium':'Bỉ',
+    'Egypt':'Ai Cập','Saudi Arabia':'Ả Rập Xê-út','Uruguay':'Uruguay',
+    'Iran':'Iran','New Zealand':'New Zealand','France':'Pháp',
+    'Senegal':'Senegal','Iraq':'Iraq','Norway':'Na Uy','Argentina':'Argentina',
+    'Algeria':'Algeria','Austria':'Áo','Jordan':'Jordan',
+    'Portugal':'Bồ Đào Nha','DR Congo':'Congo','Uzbekistan':'Uzbekistan',
+    'Colombia':'Colombia','England':'Anh','Croatia':'Croatia',
+    'Ghana':'Ghana','Panama':'Panama',
+  },
+  ru: {
+    'Mexico':'Мексика','South Africa':'ЮАР','South Korea':'Южная Корея',
+    'Czechia':'Чехия','Canada':'Канада','Bosnia & Herz.':'Босния и Герц.',
+    'USA':'США','Paraguay':'Парагвай','Qatar':'Катар','Switzerland':'Швейцария',
+    'Brazil':'Бразилия','Morocco':'Марокко','Haiti':'Гаити','Scotland':'Шотландия',
+    'Australia':'Австралия','Turkey':'Турция','Germany':'Германия','Curaçao':'Кюрасао',
+    'Netherlands':'Нидерланды','Japan':'Япония','Ivory Coast':'Кот-д\'Ивуар',
+    'Ecuador':'Эквадор','Sweden':'Швеция','Tunisia':'Тунис',
+    'Spain':'Испания','Cape Verde':'Кабо-Верде','Belgium':'Бельгия',
+    'Egypt':'Египет','Saudi Arabia':'Саудовская Аравия','Uruguay':'Уругвай',
+    'Iran':'Иран','New Zealand':'Новая Зеландия','France':'Франция',
+    'Senegal':'Сенегал','Iraq':'Ирак','Norway':'Норвегия','Argentina':'Аргентина',
+    'Algeria':'Алжир','Austria':'Австрия','Jordan':'Иордания',
+    'Portugal':'Португалия','DR Congo':'ДР Конго','Uzbekistan':'Узбекистан',
+    'Colombia':'Колумбия','England':'Англия','Croatia':'Хорватия',
+    'Ghana':'Гана','Panama':'Панама',
+  }
+};
+function tn(name) { return TEAM_NAMES[lang]?.[name] || name; }
+
+// ══════════════════════════════════════════════
 //  MATCH DATA – 72 trận vòng bảng WC 2026
 //  deadline = giờ UTC trước khi trận bắt đầu
 // ══════════════════════════════════════════════
@@ -827,9 +868,9 @@ function renderMatchCard(m) {
     <div class="match-card ${locked?'locked':''}" ${!locked ? `onclick="openModal(${m.id})"` : ''}>
       <span class="group-badge">Bảng ${m.group}</span>
       <div class="match-teams">
-        <span class="team-name left">${m.team1}</span>
+        <span class="team-name left">${tn(m.team1)}</span>
         <span class="vs">VS</span>
-        <span class="team-name right">${m.team2}</span>
+        <span class="team-name right">${tn(m.team2)}</span>
       </div>
       <div class="match-meta">
         ${statusHtml}
@@ -853,8 +894,8 @@ function openModal(matchId) {
   const m = MATCHES.find(x => x.id === matchId);
   if (!m || isLocked(m)) return;
   activeMatchId = matchId;
-  document.getElementById('modal-match-title').textContent = `${m.team1} vs ${m.team2}`;
-  document.getElementById('modal-match-sub').textContent = `Bảng ${m.group} · ${formatDate(m.date)}`;
+  document.getElementById('modal-match-title').textContent = `${tn(m.team1)} vs ${tn(m.team2)}`;
+  document.getElementById('modal-match-sub').textContent = `${t('group')} ${m.group} · ${formatDate(m.date)}`;
   const existing = getPrediction(matchId, currentPlayer);
   const [g1, g2] = existing ? existing.split('-') : ['0','0'];
   document.getElementById('pred-score1').value = g1;
@@ -948,14 +989,14 @@ function renderAdminMatchSelect() {
   if (!isAdmin) return;
   const sel = document.getElementById('admin-match-select');
   sel.innerHTML = '<option value="">-- Chọn trận đấu --</option>' +
-    MATCHES.map(m => `<option value="${m.id}">[${m.group}] ${m.team1} vs ${m.team2} (${formatDate(m.date)})${results[m.id] ? ' ✅' : ''}</option>`).join('');
+    MATCHES.map(m => `<option value="${m.id}">[${m.group}] ${tn(m.team1)} vs ${tn(m.team2)} (${formatDate(m.date)})${results[m.id] ? ' ✅' : ''}</option>`).join('');
 }
 function onAdminMatchSelect() {
   const id = parseInt(document.getElementById('admin-match-select').value);
   if (!id) return;
   const m = MATCHES.find(x => x.id === id);
-  document.getElementById('admin-team1').textContent = m.team1;
-  document.getElementById('admin-team2').textContent = m.team2;
+  document.getElementById('admin-team1').textContent = tn(m.team1);
+  document.getElementById('admin-team2').textContent = tn(m.team2);
   if (results[id]) {
     const [s1,s2] = results[id].split('-');
     document.getElementById('admin-score1').value = s1;
