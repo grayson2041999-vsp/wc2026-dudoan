@@ -301,7 +301,10 @@
 <!-- HEADER -->
 <div id="app-header">
   <div class="logo">⚽ <span>WC</span> 2026</div>
-  <div id="player-badge" onclick="switchPlayer()">Chọn tên</div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button id="lang-btn" onclick="toggleLang()" style="background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:var(--text2);cursor:pointer;">🌐 RU</button>
+    <div id="player-badge" onclick="switchPlayer()">Chọn tên</div>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -312,19 +315,19 @@
   <div class="hero-banner">
     <span class="ball">🏆</span>
     <h2>FIFA World Cup 2026™</h2>
-    <p>Chọn tên của bạn để bắt đầu dự đoán</p>
+    <p id="txt-select-sub"></p>
   </div>
-  <p class="section-title">Danh sách người chơi</p>
+  <p class="section-title" id="txt-player-list"></p>
   <div class="player-grid" id="player-grid"></div>
 </div>
 
 <!-- ══════════════ VIEW: MATCHES ══════════════ -->
 <div id="view-matches" class="view">
   <div id="filter-bar">
-    <div class="filter-chip active" data-filter="all" onclick="setFilter(this,'all')">Tất cả</div>
-    <div class="filter-chip" data-filter="open" onclick="setFilter(this,'open')">Mở</div>
-    <div class="filter-chip" data-filter="pending" onclick="setFilter(this,'pending')">Chưa đoán</div>
-    <div class="filter-chip" data-filter="done" onclick="setFilter(this,'done')">Có kết quả</div>
+    <div class="filter-chip active" data-filter="all" onclick="setFilter(this,'all')" id="fc-all"></div>
+    <div class="filter-chip" data-filter="open" onclick="setFilter(this,'open')" id="fc-open"></div>
+    <div class="filter-chip" data-filter="pending" onclick="setFilter(this,'pending')" id="fc-pending"></div>
+    <div class="filter-chip" data-filter="done" onclick="setFilter(this,'done')" id="fc-done"></div>
   </div>
   <div id="matches-list"></div>
 </div>
@@ -332,24 +335,24 @@
 <!-- ══════════════ VIEW: LEADERBOARD ══════════════ -->
 <div id="view-leaderboard" class="view">
   <div class="stats-row" id="my-stats" style="display:none">
-    <div class="stat-box"><div class="val" id="stat-pts">0</div><div class="lbl">ĐIỂM</div></div>
-    <div class="stat-box"><div class="val" id="stat-correct">0</div><div class="lbl">ĐÚNG</div></div>
-    <div class="stat-box"><div class="val" id="stat-wrong">0</div><div class="lbl">SAI</div></div>
+    <div class="stat-box"><div class="val" id="stat-correct">0</div><div class="lbl" id="lbl-correct"></div></div>
+    <div class="stat-box"><div class="val" id="stat-wrong">0</div><div class="lbl" id="lbl-wrong"></div></div>
+    <div class="stat-box"><div class="val" id="stat-total">0</div><div class="lbl" id="lbl-total"></div></div>
   </div>
-  <p class="section-title">Bảng xếp hạng</p>
+  <p class="section-title" id="txt-ranking"></p>
   <div id="lb-list"></div>
 </div>
 
 <!-- ══════════════ VIEW: ADMIN ══════════════ -->
 <div id="view-admin" class="view">
-  <p class="section-title">⚙️ Quản trị viên</p>
+  <p class="section-title">⚙️ Admin</p>
   <div id="admin-login-form">
-    <input type="password" id="admin-pwd-input" placeholder="Mật khẩu admin" />
-    <button id="btn-admin-login" onclick="adminLogin()">Đăng nhập</button>
+    <input type="password" id="admin-pwd-input" placeholder="Mật khẩu / Пароль" />
+    <button id="btn-admin-login" onclick="adminLogin()"></button>
   </div>
   <div class="admin-panel" id="admin-panel">
-    <p style="color:var(--green);font-weight:700;margin-bottom:16px;">✅ Đã đăng nhập</p>
-    <p class="section-title">Nhập kết quả trận đấu</p>
+    <p style="color:var(--green);font-weight:700;margin-bottom:16px;" id="txt-logged-in"></p>
+    <p class="section-title" id="txt-enter-result"></p>
     <select id="admin-match-select" onchange="onAdminMatchSelect()"></select>
     <div id="admin-match-info" style="color:var(--text2);font-size:13px;margin-bottom:12px;"></div>
     <div class="admin-score-row">
@@ -359,10 +362,9 @@
       <input type="number" id="admin-score2" min="0" max="20" value="0">
       <span id="admin-team2" style="font-weight:700;flex:1;text-align:left;font-size:14px;"></span>
     </div>
-    <button id="btn-admin-save" onclick="adminSaveResult()">💾 Lưu kết quả & tính điểm</button>
+    <button id="btn-admin-save" onclick="adminSaveResult()"></button>
     <div class="admin-result-list" id="admin-result-list"></div>
-
-    <p class="section-title" style="margin-top:24px;">Xem dự đoán theo trận</p>
+    <p class="section-title" style="margin-top:24px;" id="txt-view-preds"></p>
     <div id="admin-predictions-view"></div>
   </div>
 </div>
@@ -370,25 +372,25 @@
 <!-- ══════════════ PREDICT MODAL ══════════════ -->
 <div id="modal-overlay" onclick="closeModal(event)">
   <div id="modal-box">
-    <h3 id="modal-match-title">Dự đoán tỷ số</h3>
+    <h3 id="modal-match-title"></h3>
     <p class="modal-sub" id="modal-match-sub"></p>
     <div class="score-inputs">
       <input type="number" id="pred-score1" min="0" max="20" value="0" />
       <span class="score-sep">–</span>
       <input type="number" id="pred-score2" min="0" max="20" value="0" />
     </div>
-    <button id="btn-submit-pred" onclick="submitPrediction()">✅ Xác nhận dự đoán</button>
-    <button id="btn-cancel-pred" onclick="closeModal()">Huỷ</button>
+    <button id="btn-submit-pred" onclick="submitPrediction()"></button>
+    <button id="btn-cancel-pred" onclick="closeModal()"></button>
   </div>
 </div>
 
 <!-- ══════════════ BOTTOM NAV ══════════════ -->
 <nav id="bottom-nav">
   <button onclick="showView('matches')" id="nav-matches">
-    <span class="icon">🏆</span>Trận đấu
+    <span class="icon">🏆</span><span id="nav-txt-matches"></span>
   </button>
   <button onclick="showView('leaderboard')" id="nav-leaderboard">
-    <span class="icon">📊</span>Xếp hạng
+    <span class="icon">📊</span><span id="nav-txt-leaderboard"></span>
   </button>
   <button onclick="showView('admin')" id="nav-admin">
     <span class="icon">⚙️</span>Admin
@@ -418,9 +420,113 @@ const FIREBASE_CONFIG = {
 // ══════════════════════════════════════════════
 const PLAYERS = ['Truyền','Ngân','Teliants','Phương','Trâm Anh','Đức','Thắng','Sơn','Đô','Chun','Hoàng'];
 const ADMIN_PASSWORD = 'worldcup2026'; // ← Đổi mật khẩu admin tại đây
-const PTS_CORRECT = 100;
-const PTS_WRONG = -20;
 const DEFAULT_SCORE = '5-5'; // Tỷ số mặc định nếu không đoán trước deadline
+
+// ══════════════════════════════════════════════
+//  SONG NGỮ VI / RU
+// ══════════════════════════════════════════════
+const TRANS = {
+  vi: {
+    selectSub: 'Chọn tên của bạn để bắt đầu dự đoán',
+    playerList: 'Danh sách người chơi',
+    fcAll: 'Tất cả', fcOpen: 'Mở', fcPending: 'Chưa đoán', fcDone: 'Có kết quả',
+    correct: 'ĐÚNG', wrong: 'SAI', total: 'ĐÃ ĐOÁN',
+    ranking: 'Bảng xếp hạng',
+    loggedIn: '✅ Đã đăng nhập',
+    enterResult: 'Nhập kết quả trận đấu',
+    saveResult: '💾 Lưu kết quả',
+    viewPreds: 'Xem dự đoán theo trận',
+    login: 'Đăng nhập',
+    confirmPred: 'Xác nhận dự đoán',
+    cancel: 'Huỷ',
+    navMatches: 'Trận đấu',
+    navRanking: 'Xếp hạng',
+    selectPlayer: 'Chọn tên',
+    me: 'Bạn',
+    notPredicted: 'Chưa đoán',
+    locked: 'Hết giờ đoán',
+    auto: '(tự động)',
+    toasted: (s) => `Đã đoán ${s}`,
+    toastedResult: (s) => `Đã lưu kết quả ${s}`,
+    wrongPwd: 'Sai mật khẩu',
+    chooseMatch: 'Chọn trận trước',
+    myPred: 'Tôi',
+    group: 'Bảng',
+    deadline: 'Deadline',
+    correctLabel: 'Đúng',
+    wrongLabel: 'Sai',
+    predOf: 'Dự đoán của mọi người:',
+    noOne: 'Chưa ai đoán',
+  },
+  ru: {
+    selectSub: 'Выберите своё имя для начала прогнозов',
+    playerList: 'Список игроков',
+    fcAll: 'Все', fcOpen: 'Открытые', fcPending: 'Без прогноза', fcDone: 'Есть результат',
+    correct: 'ВЕРНО', wrong: 'НЕВЕРНО', total: 'СЫГРАНО',
+    ranking: 'Рейтинг',
+    loggedIn: '✅ Вы вошли',
+    enterResult: 'Ввести результат матча',
+    saveResult: '💾 Сохранить результат',
+    viewPreds: 'Прогнозы по матчу',
+    login: 'Войти',
+    confirmPred: 'Подтвердить прогноз',
+    cancel: 'Отмена',
+    navMatches: 'Матчи',
+    navRanking: 'Рейтинг',
+    selectPlayer: 'Выбрать имя',
+    me: 'Я',
+    notPredicted: 'Нет прогноза',
+    locked: 'Приём закрыт',
+    auto: '(авто)',
+    toasted: (s) => `Прогноз сохранён: ${s}`,
+    toastedResult: (s) => `Результат сохранён: ${s}`,
+    wrongPwd: 'Неверный пароль',
+    chooseMatch: 'Сначала выберите матч',
+    myPred: 'Мой',
+    group: 'Группа',
+    deadline: 'Дедлайн',
+    correctLabel: 'Верно',
+    wrongLabel: 'Неверно',
+    predOf: 'Прогнозы участников:',
+    noOne: 'Никто не сделал прогноз',
+  }
+};
+let lang = localStorage.getItem('wc2026_lang') || 'vi';
+function t(key, ...args) {
+  const v = TRANS[lang][key];
+  return typeof v === 'function' ? v(...args) : v;
+}
+function toggleLang() {
+  lang = lang === 'vi' ? 'ru' : 'vi';
+  localStorage.setItem('wc2026_lang', lang);
+  applyLang();
+  renderCurrentView();
+}
+function applyLang() {
+  document.getElementById('lang-btn').textContent = lang === 'vi' ? '🌐 RU' : '🌐 VI';
+  document.getElementById('txt-select-sub').textContent = t('selectSub');
+  document.getElementById('txt-player-list').textContent = t('playerList');
+  document.getElementById('fc-all').textContent = t('fcAll');
+  document.getElementById('fc-open').textContent = t('fcOpen');
+  document.getElementById('fc-pending').textContent = t('fcPending');
+  document.getElementById('fc-done').textContent = t('fcDone');
+  document.getElementById('lbl-correct').textContent = t('correct');
+  document.getElementById('lbl-wrong').textContent = t('wrong');
+  document.getElementById('lbl-total').textContent = t('total');
+  document.getElementById('txt-ranking').textContent = t('ranking');
+  document.getElementById('txt-logged-in').textContent = t('loggedIn');
+  document.getElementById('txt-enter-result').textContent = t('enterResult');
+  document.getElementById('btn-admin-save').textContent = t('saveResult');
+  document.getElementById('btn-admin-login').textContent = t('login');
+  document.getElementById('txt-view-preds').textContent = t('viewPreds');
+  document.getElementById('btn-submit-pred').textContent = t('confirmPred');
+  document.getElementById('btn-cancel-pred').textContent = t('cancel');
+  document.getElementById('nav-txt-matches').textContent = t('navMatches');
+  document.getElementById('nav-txt-leaderboard').textContent = t('navRanking');
+  const badge = document.getElementById('player-badge');
+  if (badge.textContent === 'Chọn tên' || badge.textContent === 'Выбрать имя') badge.textContent = t('selectPlayer');
+  renderPlayerGrid();
+}
 
 // ══════════════════════════════════════════════
 //  MATCH DATA – 72 trận vòng bảng WC 2026
@@ -691,19 +797,21 @@ function renderMatchCard(m) {
     if (effectivePred) {
       const pts = scores[currentPlayer]?.[m.id]?.points ?? '?';
       const ptsClass = pts > 0 ? 'pts-plus' : (pts < 0 ? 'pts-minus' : '');
-      predHtml = `<span class="my-prediction">Tôi: <span class="score">${effectivePred}</span> <span class="${ptsClass}">(${pts > 0 ? '+' : ''}${pts}đ)</span></span>`;
+      const correctData = scores[currentPlayer]?.[m.id];
+      const resultMark = correctData ? (correctData.correct ? `<span style="color:var(--green)"> ${t('correctLabel')}</span>` : `<span style="color:var(--red)"> ${t('wrongLabel')}</span>`) : '';
+      predHtml = `<span class="my-prediction">${t('myPred')}: <span class="score">${effectivePred}</span>${resultMark}</span>`;
     }
   } else if (locked) {
-    statusHtml = `<span class="match-status locked">🔒 Hết giờ đoán</span>`;
+    statusHtml = `<span class="match-status locked">🔒 ${t('locked')}</span>`;
     if (effectivePred) {
-      predHtml = `<span class="my-prediction">Tôi: <span class="score">${effectivePred}</span>${!myPred?' (tự động)':''}</span>`;
+      predHtml = `<span class="my-prediction">${t('myPred')}: <span class="score">${effectivePred}</span>${!myPred?' '+t('auto'):''}</span>`;
     }
   } else {
     statusHtml = `<span class="match-status open">🕐 ${formatKickoffVN(m.kickoff)}</span>`;
     if (myPred) {
-      predHtml = `<span class="my-prediction">Tôi: <span class="score">${myPred}</span> ✏️</span>`;
+      predHtml = `<span class="my-prediction">${t('myPred')}: <span class="score">${myPred}</span> ✏️</span>`;
     } else {
-      predHtml = `<span class="my-prediction" style="color:var(--accent2)">Chưa đoán</span>`;
+      predHtml = `<span class="my-prediction" style="color:var(--accent2)">${t('notPredicted')}</span>`;
     }
   }
 
@@ -711,7 +819,7 @@ function renderMatchCard(m) {
   const predictors = PLAYERS.filter(p => getPrediction(m.id, p));
   const predCount = predictors.length;
   const predCountHtml = `<span class="pred-count" onclick="togglePredictors(event,${m.id})" title="Xem ai đã đoán">👥 ${predCount}/${PLAYERS.length}</span>`;
-  const predictorListHtml = `<div class="predictor-list" id="predictors-${m.id}" style="display:none">${predictors.map(p=>`<span class="predictor-chip ${p===currentPlayer?'me':''}">${p}</span>`).join('')}${predictors.length===0?'<span style="color:var(--text2);font-size:12px">Chưa ai đoán</span>':''}</div>`;
+  const predictorListHtml = `<div class="predictor-list" id="predictors-${m.id}" style="display:none">${predictors.map(p=>`<span class="predictor-chip ${p===currentPlayer?'me':''}">${p}</span>`).join('')}${predictors.length===0?`<span style="color:var(--text2);font-size:12px">${t('noOne')}</span>`:''}</div>`;
 
   return `
     <div class="match-card ${locked?'locked':''}" ${!locked ? `onclick="openModal(${m.id})"` : ''}>
@@ -771,7 +879,7 @@ async function submitPrediction() {
   }
   document.getElementById('modal-overlay').classList.remove('open');
   activeMatchId = null;
-  showToast(`✅ Đã đoán ${score}`);
+  showToast(t('toasted', score));
   renderMatches();
 }
 
@@ -782,26 +890,27 @@ function renderLeaderboard() {
   // Chỉ hiện người đã có ít nhất 1 dự đoán
   const activePlayers = PLAYERS.filter(p => isPlayerActive(p));
   const lb = activePlayers.map(p => {
-    let pts = 0, correct = 0, wrong = 0;
+    let correct = 0, wrong = 0;
     Object.entries(scores[p] || {}).forEach(([mid, data]) => {
-      pts += data.points || 0;
-      if (data.points === PTS_CORRECT) correct++;
-      if (data.points === PTS_WRONG) wrong++;
+      if (data.correct === true) correct++;
+      else if (data.correct === false) wrong++;
     });
-    return {name: p, pts, correct, wrong};
-  }).sort((a,b) => b.pts - a.pts || b.correct - a.correct);
+    return {name: p, correct, wrong, total: correct + wrong};
+  }).sort((a,b) => b.correct - a.correct || a.wrong - b.wrong);
 
   const medals = ['🥇','🥈','🥉'];
-  document.getElementById('lb-list').innerHTML = lb.map((p, i) => {
+  document.getElementById('lb-list').innerHTML = lb.length === 0
+    ? `<p class="empty-msg">${t('notPredicted')}</p>`
+    : lb.map((p, i) => {
     const isMe = p.name === currentPlayer;
     return `
       <div class="lb-card">
         <div class="lb-rank r${i+1}">${i < 3 ? medals[i] : i+1}</div>
         <div>
-          <div class="lb-name">${p.name}${isMe ? '<span class="me-badge">Bạn</span>' : ''}</div>
-          <div class="lb-detail">✅ ${p.correct} đúng · ❌ ${p.wrong} sai</div>
+          <div class="lb-name">${p.name}${isMe ? `<span class="me-badge">${t('me')}</span>` : ''}</div>
+          <div class="lb-detail">${t('correctLabel')}: ${p.correct} · ${t('wrongLabel')}: ${p.wrong}</div>
         </div>
-        <div class="lb-pts">${p.pts}</div>
+        <div class="lb-pts" style="font-size:22px">${p.correct}<span style="font-size:13px;color:var(--text2)"> ${t('correct').toLowerCase()}</span></div>
       </div>
     `;
   }).join('');
@@ -810,9 +919,9 @@ function renderLeaderboard() {
   const me = lb.find(p => p.name === currentPlayer);
   if (me && currentPlayer) {
     document.getElementById('my-stats').style.display = 'grid';
-    document.getElementById('stat-pts').textContent = me.pts;
     document.getElementById('stat-correct').textContent = me.correct;
     document.getElementById('stat-wrong').textContent = me.wrong;
+    document.getElementById('stat-total').textContent = me.total;
   }
 }
 
@@ -827,7 +936,7 @@ function adminLogin() {
     document.getElementById('admin-panel').classList.add('open');
     renderAdminMatchSelect();
   } else {
-    showToast('❌ Sai mật khẩu');
+    showToast(t('wrongPwd'));
   }
 }
 function renderAdminMatchSelect() {
@@ -856,7 +965,7 @@ function onAdminMatchSelect() {
 }
 async function adminSaveResult() {
   const id = parseInt(document.getElementById('admin-match-select').value);
-  if (!id) { showToast('Chọn trận trước'); return; }
+  if (!id) { showToast(t('chooseMatch')); return; }
   const s1 = parseInt(document.getElementById('admin-score1').value) || 0;
   const s2 = parseInt(document.getElementById('admin-score2').value) || 0;
   const actualScore = `${s1}-${s2}`;
@@ -868,21 +977,20 @@ async function adminSaveResult() {
     results[id] = actualScore;
   }
 
-  // Chỉ tính điểm cho người đã tham gia (có ít nhất 1 dự đoán)
+  // Chỉ tính cho người đã tham gia (có ít nhất 1 dự đoán)
   const resultItems = [];
   for (const player of PLAYERS) {
-    if (!isPlayerActive(player)) continue; // bỏ qua người chưa tham gia
+    if (!isPlayerActive(player)) continue;
     const pred = getEffectivePrediction(id, player);
     const isCorrect = pred === actualScore;
-    const pts = isCorrect ? PTS_CORRECT : PTS_WRONG;
-    const data = {predicted: pred || DEFAULT_SCORE, actual: actualScore, points: pts};
+    const data = {predicted: pred || DEFAULT_SCORE, actual: actualScore, correct: isCorrect};
     if (firebaseOK) {
       await db.ref(`scores/${player}/${id}`).set(data);
     } else {
       if (!scores[player]) scores[player] = {};
       scores[player][id] = data;
     }
-    resultItems.push({player, pred: pred || DEFAULT_SCORE, pts, isCorrect});
+    resultItems.push({player, pred: pred || DEFAULT_SCORE, isCorrect});
   }
 
   // Show results
@@ -891,11 +999,11 @@ async function adminSaveResult() {
       <div class="admin-result-item">
         <span>${r.player}</span>
         <span>${r.pred}</span>
-        <span style="color:${r.isCorrect?'var(--green)':'var(--red)'};font-weight:800">${r.isCorrect?'✅':''} ${r.pts > 0 ? '+' : ''}${r.pts}đ</span>
+        <span style="color:${r.isCorrect?'var(--green)':'var(--red)'};font-weight:800">${r.isCorrect ? t('correctLabel') : t('wrongLabel')}</span>
       </div>
     `).join('');
 
-  showToast(`✅ Đã lưu kết quả ${actualScore}`);
+  showToast(t('toastedResult', actualScore));
   renderAdminMatchSelect();
 }
 function renderAdminPredictions() {
@@ -908,16 +1016,16 @@ function renderAdminPredictions() {
     const pred = getEffectivePrediction(id, p) || '—';
     const pData = predictions[id]?.[p];
     const isAuto = !pData && isLocked(m);
-    const score = scores[p]?.[id];
-    const pts = score ? `<span style="color:${score.points>0?'var(--green)':'var(--red)'};font-weight:800">${score.points>0?'+':''}${score.points}đ</span>` : '';
+    const scoreData = scores[p]?.[id];
+    const resultTag = scoreData ? `<span style="color:${scoreData.correct?'var(--green)':'var(--red)'};font-weight:800">${scoreData.correct?t('correctLabel'):t('wrongLabel')}</span>` : '';
     return `<div class="admin-result-item">
       <span>${p}</span>
-      <span>${pred}${isAuto?' <em style="color:var(--text2);font-size:11px">(auto)</em>':''}</span>
-      ${pts}
+      <span>${pred}${isAuto?' <em style="color:var(--text2);font-size:11px">'+t('auto')+'</em>':''}</span>
+      ${resultTag}
     </div>`;
   }).join('');
   document.getElementById('admin-predictions-view').innerHTML =
-    `<p style="font-size:12px;color:var(--text2);margin-bottom:8px">Dự đoán của mọi người:</p>${html}`;
+    `<p style="font-size:12px;color:var(--text2);margin-bottom:8px">${t('predOf')}</p>${html}`;
 }
 
 // ══════════════════════════════════════════════
@@ -925,7 +1033,7 @@ function renderAdminPredictions() {
 // ══════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   initFirebase();
-  renderPlayerGrid();
+  applyLang();
   if (currentPlayer) {
     document.getElementById('player-badge').textContent = currentPlayer;
     document.getElementById('bottom-nav').style.display = 'flex';
