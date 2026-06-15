@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>⚽ Đoàn thanh niên vui Worldcup</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #071a0f;
+      --card: #0d2818;
+      --card2: #163520;
+      --accent: #00e676;
+      --accent2: #ff6b35;
+      --green: #00e676;
+      --red: #ff4444;
+      --text: #f0fff4;
+      --text2: #7aab8a;
+      --border: #1a4028;
+      --r: 14px;
+      --gold: #ffd700;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+      padding-bottom: 80px;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    #app-header {
+      position: sticky; top: 0; z-index: 100;
+      background: linear-gradient(135deg, #041208, #0a2010);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-size: 16px; font-weight: 900; letter-spacing: -0.3px; line-height: 1.2; }
+    .logo span { color: var(--accent); }
+    .logo small { display: block; font-size: 10px; font-weight: 600; color: var(--text2); letter-spacing: 0.5px; }
+    #user-badge {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 13px; font-weight: 700; color: var(--accent);
+      cursor: pointer; max-width: 160px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── VIEWS ── */
+    .view { display: none; padding: 16px; }
+    .view.active { display: block; }
+
+    /* ── AUTH ── */
+    .auth-hero {
+      text-align: center; padding: 28px 0 20px; position: relative;
+    }
+    .auth-hero .ball { font-size: 52px; display: block; margin-bottom: 10px; }
+    .auth-hero h1 { font-size: 20px; font-weight: 900; line-height: 1.3; }
+    .auth-hero p { font-size: 13px; color: var(--text2); margin-top: 6px; }
+    #admin-entry-btn {
+      position: absolute; top: 28px; right: 0;
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text2);
+      font-size: 11px; font-weight: 700; padding: 5px 10px; cursor: pointer;
+    }
+
+    /* Player picker grid */
+    .player-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-top: 8px;
+    }
+    .player-tile {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 18px 12px;
+      text-align: center; cursor: pointer;
+      transition: border-color .15s, background .15s;
+      position: relative;
+    }
+    .player-tile:active { background: var(--card2); }
+    .player-tile.approved { border-color: var(--border); }
+    .player-tile.approved:hover { border-color: var(--accent); }
+    .player-tile.pending { opacity: .55; cursor: default; }
+    .player-tile .avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, #163520, #1e4a2a);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 900; margin: 0 auto 10px;
+      color: var(--accent);
+    }
+    .player-tile.pending .avatar { border-color: var(--text2); color: var(--text2); }
+    .player-tile .tile-name { font-size: 13px; font-weight: 800; line-height: 1.3; }
+    .player-tile .tile-status {
+      font-size: 10px; font-weight: 700; margin-top: 5px;
+      padding: 2px 8px; border-radius: 8px; display: inline-block;
+    }
+    .tile-status.ok  { background: rgba(0,230,118,.12); color: var(--green); }
+    .tile-status.wait{ background: rgba(255,107,53,.12); color: var(--accent2); }
+    .register-tile {
+      background: none; border: 2px dashed var(--border);
+      border-radius: var(--r); padding: 18px 12px;
+      text-align: center; cursor: pointer;
+      transition: border-color .15s;
+    }
+    .register-tile:hover { border-color: var(--accent); }
+    .register-tile .plus { font-size: 28px; color: var(--text2); margin-bottom: 8px; }
+    .register-tile .tile-name { font-size: 13px; font-weight: 800; color: var(--text2); }
+
+    /* Auth form (register) */
+    .auth-form { display: flex; flex-direction: column; gap: 12px; }
+    .auth-form input {
+      width: 100%; padding: 15px 16px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text); font-size: 16px;
+    }
+    .auth-form input:focus { outline: none; border-color: var(--accent); }
+    .btn-primary {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--accent), #00b248);
+      border: none; border-radius: var(--r);
+      color: #000; font-size: 16px; font-weight: 900;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .btn-primary:active { opacity: .85; }
+    .btn-secondary {
+      width: 100%; padding: 14px;
+      background: none; border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text2);
+      font-size: 14px; cursor: pointer; margin-top: 4px;
+    }
+
+    /* Password modal */
+    #pwd-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: center;
+    }
+    #pwd-modal-overlay.open { display: flex; }
+    #pwd-modal-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 24px 24px 0 0; padding: 28px 20px 40px;
+      width: 100%; max-width: 480px;
+    }
+    #pwd-modal-box .pm-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, #163520, #1e4a2a);
+      border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 900; color: var(--accent);
+      margin: 0 auto 12px;
+    }
+    #pwd-modal-box h3 { text-align: center; font-size: 18px; font-weight: 900; margin-bottom: 4px; }
+    #pwd-modal-box .pm-sub { text-align: center; font-size: 12px; color: var(--text2); margin-bottom: 20px; }
+    #pwd-modal-input {
+      width: 100%; padding: 16px; font-size: 18px; letter-spacing: 3px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text); text-align: center;
+      margin-bottom: 12px;
+    }
+    #pwd-modal-input:focus { outline: none; border-color: var(--accent); }
+    #pwd-error { color: var(--red); font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 10px; min-height: 20px; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--text2);
+      margin: 20px 0 10px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px; margin-bottom: 8px;
+    }
+
+    /* ── FILTER BAR ── */
+    #filter-bar {
+      display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto;
+      scrollbar-width: none; padding-bottom: 4px;
+    }
+    #filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      flex-shrink: 0; padding: 6px 14px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; font-size: 12px; font-weight: 700;
+      cursor: pointer; color: var(--text2); transition: all .15s;
+    }
+    .filter-chip.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+    /* ── MATCH CARD ── */
+    .match-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px; margin-bottom: 8px;
+      position: relative;
+    }
+    .match-card.has-result {
+      background: #060f09;
+      border-color: #111f16;
+      opacity: 0.7;
+    }
+    .match-card:not(.locked) { cursor: pointer; }
+    .match-card:not(.locked):active { border-color: var(--accent2); }
+    .group-badge {
+      position: absolute; top: 10px; right: 12px;
+      font-size: 10px; font-weight: 800; letter-spacing: 1px;
+      color: var(--text2); background: var(--card2);
+      padding: 2px 7px; border-radius: 10px;
+    }
+    .match-teams {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .team-name { font-size: 14px; font-weight: 800; flex: 1; }
+    .team-name.left { text-align: right; }
+    .team-name.right { text-align: left; }
+    .vs { font-size: 11px; font-weight: 800; color: var(--text2); min-width: 22px; text-align: center; }
+    .match-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+    .match-status { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; }
+    .match-status.open { background: rgba(0,230,118,.12); color: var(--green); }
+    .match-status.locked { background: rgba(255,68,68,.12); color: var(--red); }
+    .match-status.done { background: rgba(255,215,0,.12); color: var(--gold); }
+    .my-pred { font-size: 12px; font-weight: 700; color: var(--text2); }
+    .my-pred .sc { color: var(--text); }
+    .my-pred .ok {
+      color: var(--green); font-size: 16px; font-weight: 900;
+      background: rgba(0,230,118,.12); border-radius: 8px;
+      padding: 2px 8px; letter-spacing: -0.3px;
+    }
+    .my-pred .no { color: var(--red); font-size: 11px; font-weight: 600; opacity: .8; }
+    .pred-count {
+      font-size: 11px; font-weight: 700; color: var(--text2);
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 3px 8px; cursor: pointer;
+    }
+    .predictor-list {
+      margin-top: 10px; flex-wrap: wrap; gap: 6px;
+      border-top: 1px solid var(--border); padding-top: 10px;
+    }
+    .predictor-chip {
+      font-size: 11px; font-weight: 600; padding: 3px 9px;
+      background: var(--card2); border-radius: 8px; color: var(--text2);
+    }
+    .predictor-chip.me      { background: rgba(0,230,118,.15); color: var(--accent); }
+    .predictor-chip.done    { background: rgba(0,230,118,.08); color: var(--green); }
+    .predictor-chip.missing { background: rgba(255,68,68,.12); color: var(--red); }
+    .date-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--accent); padding: 12px 0 6px; text-transform: uppercase; }
+
+    /* ── PREDICT MODAL ── */
+    #modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: center;
+    }
+    #modal-overlay.open { display: flex; }
+    #modal-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 24px 24px 0 0; padding: 24px 20px 40px;
+      width: 100%; max-width: 480px;
+    }
+    #modal-box h3 { font-size: 17px; font-weight: 900; margin-bottom: 4px; }
+    #modal-box .modal-sub { font-size: 12px; color: var(--text2); margin-bottom: 20px; }
+    .score-inputs { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; }
+    .score-inputs input {
+      width: 72px; height: 72px;
+      background: var(--card2); border: 2px solid var(--border);
+      border-radius: var(--r); color: var(--text);
+      font-size: 32px; font-weight: 900; text-align: center;
+      -moz-appearance: textfield;
+    }
+    .score-inputs input::-webkit-outer-spin-button,
+    .score-inputs input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .score-inputs input:focus { outline: none; border-color: var(--accent); }
+    .score-sep { font-size: 28px; font-weight: 900; color: var(--text2); }
+
+    /* ── LEADERBOARD ── */
+    .total-box {
+      background: linear-gradient(135deg, #0d2818, #163520);
+      border: 2px solid var(--accent); border-radius: var(--r);
+      padding: 16px; margin-bottom: 16px; text-align: center;
+    }
+    .total-box .lbl { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
+    .total-box .val { font-size: 28px; font-weight: 900; }
+    .total-box .val.pos { color: var(--green); }
+    .total-box .val.neg { color: var(--red); }
+    .lb-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px; margin-bottom: 8px;
+    }
+    .lb-rank { font-size: 18px; font-weight: 900; min-width: 28px; color: var(--text2); }
+    .lb-rank.r1 { color: var(--gold); }
+    .lb-rank.r2 { color: #C0C0C0; }
+    .lb-rank.r3 { color: #CD7F32; }
+    .lb-name { font-size: 15px; font-weight: 800; flex: 1; }
+    .lb-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .lb-pts { font-size: 17px; font-weight: 900; white-space: nowrap; }
+    .lb-pts.pos { color: var(--green); }
+    .lb-pts.neg { color: var(--red); }
+    .me-badge { font-size: 10px; background: var(--accent); color: #000; border-radius: 6px; padding: 1px 5px; font-weight: 800; margin-left: 5px; }
+
+    /* ── ADMIN ── */
+    #admin-pwd-input, #admin-match-select {
+      width: 100%; padding: 14px; margin-bottom: 12px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text); font-size: 15px;
+    }
+    #admin-match-select option { background: var(--card2); }
+    .btn-danger {
+      background: var(--red); border: none; border-radius: 10px;
+      color: #fff; font-size: 12px; font-weight: 700; padding: 6px 12px; cursor: pointer;
+    }
+    .btn-approve {
+      background: var(--green); border: none; border-radius: 10px;
+      color: #000; font-size: 12px; font-weight: 700; padding: 6px 12px; cursor: pointer;
+    }
+    .admin-user-row {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 12px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .admin-result-item {
+      background: var(--card2); border-radius: 10px; padding: 10px 14px;
+      margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px;
+    }
+    .admin-score-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    }
+    .admin-score-row input {
+      width: 60px; height: 52px; text-align: center;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text); font-size: 22px; font-weight: 800;
+      -moz-appearance: textfield;
+    }
+    .admin-score-row input::-webkit-outer-spin-button,
+    .admin-score-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    /* ── BOTTOM NAV ── */
+    #bottom-nav {
+      display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: #041208; border-top: 1px solid var(--border);
+    }
+    #bottom-nav button {
+      flex: 1; padding: 12px 8px 14px;
+      background: none; border: none; color: var(--text2);
+      font-size: 10px; font-weight: 700; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      transition: color .15s;
+    }
+    #bottom-nav.show { display: flex; }
+    #bottom-nav button .icon { font-size: 20px; }
+    #bottom-nav button.active { color: var(--accent); }
+
+    /* ── MISC ── */
+    .toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: #1e3a28; color: #fff; padding: 10px 20px;
+      border-radius: 20px; font-size: 14px; font-weight: 600;
+      z-index: 999; opacity: 0; transition: opacity .3s;
+      white-space: nowrap; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    .empty-msg { text-align: center; color: var(--text2); padding: 40px 20px; font-size: 15px; }
+    .pts-fmt { font-size: 13px; font-weight: 800; }
+    .pts-fmt.pos { color: var(--green); }
+    .pts-fmt.neg { color: var(--red); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="app-header">
+  <div class="logo">
+    ⚽ <span>Đoàn thanh niên</span>
+    <small>vui Worldcup 2026</small>
+  </div>
+  <div id="user-badge" onclick="logoutPrompt()" style="display:none"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════ VIEW: AUTH ══════════════ -->
+<div id="view-auth" class="view active">
+
+  <!-- PLAYER PICKER -->
+  <div id="picker-wrap">
+    <div class="auth-hero">
+      <span class="ball">🏆</span>
+      <h1>Đoàn thanh niên<br>vui Worldcup 2026</h1>
+      <p>Chọn tên của bạn để bắt đầu</p>
+      <button id="admin-entry-btn" onclick="showView('admin')">⚙️ Admin</button>
+    </div>
+    <div class="player-grid" id="player-grid"></div>
+  </div>
+
+  <!-- REGISTER FORM -->
+  <div id="register-wrap" style="display:none">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-top:16px">
+      <button onclick="showPicker()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;padding:0">←</button>
+      <h2 style="font-size:18px;font-weight:900">Tạo tài khoản</h2>
+    </div>
+    <div class="auth-form">
+      <input type="text" id="reg-name" placeholder="Họ và tên đầy đủ" autocomplete="name" />
+      <input type="password" id="reg-pwd" placeholder="Đặt mật khẩu (tối thiểu 4 ký tự)" />
+      <input type="password" id="reg-pwd2" placeholder="Nhập lại mật khẩu" />
+      <button class="btn-primary" onclick="doRegister()">✅ Gửi đăng ký</button>
+      <p style="font-size:12px;color:var(--text2);text-align:center">Admin sẽ duyệt tài khoản trước khi bạn tham gia được</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ PASSWORD MODAL ══════════════ -->
+<div id="pwd-modal-overlay" onclick="closePwdModal(event)">
+  <div id="pwd-modal-box">
+    <div class="pm-avatar" id="pm-avatar"></div>
+    <h3 id="pm-name"></h3>
+    <p class="pm-sub">Nhập mật khẩu để vào</p>
+    <input type="password" id="pwd-modal-input" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doPwdLogin()" />
+    <div id="pwd-error"></div>
+    <button class="btn-primary" onclick="doPwdLogin()">Vào ▶</button>
+    <button class="btn-secondary" onclick="closePwdModal()">Huỷ</button>
+  </div>
+</div>
+
+<!-- ══════════════ VIEW: MATCHES ══════════════ -->
+<div id="view-matches" class="view">
+  <div id="filter-bar">
+    <div class="filter-chip active" onclick="setFilter(this,'all')">Tất cả</div>
+    <div class="filter-chip" onclick="setFilter(this,'open')">Đang mở</div>
+    <div class="filter-chip" onclick="setFilter(this,'pending')">Chưa đoán</div>
+    <div class="filter-chip" onclick="setFilter(this,'done')">Có kết quả</div>
+  </div>
+  <div id="matches-list"></div>
+</div>
+
+<!-- ══════════════ VIEW: LEADERBOARD ══════════════ -->
+<div id="view-leaderboard" class="view">
+  <div class="total-box">
+    <div class="lbl">Quy mô đóng góp cả nhóm</div>
+    <div class="val" id="total-pts">0</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:4px" id="total-sub"></div>
+  </div>
+  <p class="section-title">Vinh danh TOP các mạnh thường quân</p>
+  <div id="lb-list"></div>
+</div>
+
+<!-- ══════════════ VIEW: ADMIN ══════════════ -->
+<div id="view-admin" class="view">
+  <p class="section-title">⚙️ Admin</p>
+  <div id="admin-login-wrap">
+    <input type="password" id="admin-pwd-input" placeholder="Mật khẩu admin" />
+    <button class="btn-primary" onclick="adminLogin()">Đăng nhập Admin</button>
+  </div>
+  <div id="admin-panel" style="display:none">
+    <p style="color:var(--green);font-weight:700;margin-bottom:16px;">✅ Đã đăng nhập Admin</p>
+
+    <!-- DUYỆT TÀI KHOẢN -->
+    <p class="section-title">👤 Duyệt tài khoản</p>
+    <div id="admin-users-list"></div>
+
+    <!-- TÍNH LẠI ĐIỂM -->
+    <p class="section-title" style="margin-top:24px">Tính lại toàn bộ điểm</p>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Tính lại điểm tất cả mọi người theo luật mới (+20.000 / -10.000), bỏ qua trận 1 & 2.</p>
+    <button class="btn-primary" onclick="recalculateAll()" style="margin-bottom:4px">Tính lại điểm tất cả</button>
+
+    <!-- NHẬP KẾT QUẢ -->
+    <p class="section-title" style="margin-top:24px">Nhập kết quả trận</p>
+    <select id="admin-match-select" onchange="onAdminMatchSelect()"></select>
+    <div id="admin-match-info" style="color:var(--text2);font-size:13px;margin-bottom:12px;"></div>
+    <div class="admin-score-row">
+      <span id="admin-team1" style="font-weight:800;flex:1;text-align:right;font-size:13px;"></span>
+      <input type="number" id="admin-score1" min="0" max="20" value="0">
+      <span style="font-size:20px;font-weight:900;color:var(--text2)">–</span>
+      <input type="number" id="admin-score2" min="0" max="20" value="0">
+      <span id="admin-team2" style="font-weight:800;flex:1;text-align:left;font-size:13px;"></span>
+    </div>
+    <button class="btn-primary" onclick="adminSaveResult()">💾 Lưu & tính điểm</button>
+    <div id="admin-result-list" style="margin-top:12px;"></div>
+    <p class="section-title" style="margin-top:24px">📋 Dự đoán theo trận</p>
+    <div id="admin-preds-view"></div>
+  </div>
+</div>
+
+<!-- ══════════════ PREDICT MODAL ══════════════ -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal-box">
+    <h3 id="modal-title">Dự đoán tỷ số</h3>
+    <p class="modal-sub" id="modal-sub"></p>
+    <div class="score-inputs">
+      <input type="number" id="pred1" min="0" max="20" value="0" />
+      <span class="score-sep">–</span>
+      <input type="number" id="pred2" min="0" max="20" value="0" />
+    </div>
+    <button class="btn-primary" onclick="submitPred()">✅ Xác nhận</button>
+    <button class="btn-secondary" onclick="closeModal(null)">Huỷ</button>
+  </div>
+</div>
+
+<!-- ══════════════ BOTTOM NAV ══════════════ -->
+<nav id="bottom-nav">
+  <button onclick="showView('matches')" id="nav-matches">
+    <span class="icon">🏆</span>Trận đấu
+  </button>
+  <button onclick="showView('leaderboard')" id="nav-leaderboard">
+    <span class="icon">📊</span>Xếp hạng
+  </button>
+  <button onclick="showView('admin')" id="nav-admin">
+    <span class="icon">⚙️</span>Admin
+  </button>
+</nav>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+// ══════════════════════════════════════════════
+//  FIREBASE CONFIG
+// ══════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC4sizkFzJnnmwbIN2_zcQst1DlDMMah88",
+  authDomain: "dtn-554e4.firebaseapp.com",
+  databaseURL: "https://dtn-554e4-default-rtdb.firebaseio.com",
+  projectId: "dtn-554e4",
+  storageBucket: "dtn-554e4.firebasestorage.app",
+  messagingSenderId: "908840760249",
+  appId: "1:908840760249:web:f361f4d74b5b77d9243c68"
+};
+const DB = 'mg'; // root path trong Firebase
+
+// ══════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════
+const ADMIN_PASSWORD = '443004';
+const PTS_CORRECT    = 20000;
+const PTS_WRONG      = -10000;
+const DEFAULT_SCORE  = '5-5';
+
+// ══════════════════════════════════════════════
+//  MATCH DATA – 72 trận vòng bảng WC 2026
+// ══════════════════════════════════════════════
+const MATCHES = [
+  {id:1,  group:"A", team1:"Mê-hi-cô",       team2:"Nam Phi",          kickoff:"2026-06-11T19:00:00Z"},
+  {id:2,  group:"A", team1:"Hàn Quốc",        team2:"Séc",              kickoff:"2026-06-12T02:00:00Z"},
+  {id:3,  group:"B", team1:"Canada",           team2:"Bosnia & Herz.",   kickoff:"2026-06-12T19:00:00Z"},
+  {id:4,  group:"D", team1:"Mỹ",              team2:"Paraguay",         kickoff:"2026-06-13T01:00:00Z"},
+  {id:5,  group:"B", team1:"Qatar",            team2:"Thụy Sĩ",          kickoff:"2026-06-13T19:00:00Z"},
+  {id:6,  group:"C", team1:"Brazil",           team2:"Ma-rốc",           kickoff:"2026-06-13T22:00:00Z"},
+  {id:7,  group:"C", team1:"Haiti",            team2:"Scotland",         kickoff:"2026-06-14T01:00:00Z"},
+  {id:8,  group:"D", team1:"Úc",              team2:"Thổ Nhĩ Kỳ",       kickoff:"2026-06-14T04:00:00Z"},
+  {id:9,  group:"E", team1:"Đức",             team2:"Curaçao",          kickoff:"2026-06-14T17:00:00Z"},
+  {id:10, group:"F", team1:"Hà Lan",          team2:"Nhật Bản",         kickoff:"2026-06-14T20:00:00Z"},
+  {id:11, group:"E", team1:"Bờ Biển Ngà",     team2:"Ecuador",          kickoff:"2026-06-14T23:00:00Z"},
+  {id:12, group:"F", team1:"Thụy Điển",        team2:"Tunisia",          kickoff:"2026-06-15T02:00:00Z"},
+  {id:13, group:"H", team1:"Tây Ban Nha",      team2:"Cape Verde",       kickoff:"2026-06-15T17:00:00Z"},
+  {id:14, group:"G", team1:"Bỉ",              team2:"Ai Cập",           kickoff:"2026-06-15T22:00:00Z"},
+  {id:15, group:"H", team1:"Ả Rập Xê-út",     team2:"Uruguay",          kickoff:"2026-06-15T22:00:00Z"},
+  {id:16, group:"G", team1:"Iran",             team2:"New Zealand",      kickoff:"2026-06-16T04:00:00Z"},
+  {id:17, group:"I", team1:"Pháp",            team2:"Senegal",          kickoff:"2026-06-16T19:00:00Z"},
+  {id:18, group:"I", team1:"Iraq",             team2:"Na Uy",            kickoff:"2026-06-16T22:00:00Z"},
+  {id:19, group:"J", team1:"Argentina",        team2:"Algeria",          kickoff:"2026-06-17T01:00:00Z"},
+  {id:20, group:"J", team1:"Áo",              team2:"Jordan",           kickoff:"2026-06-17T04:00:00Z"},
+  {id:21, group:"K", team1:"Bồ Đào Nha",      team2:"Congo",            kickoff:"2026-06-17T17:00:00Z"},
+  {id:22, group:"L", team1:"Anh",             team2:"Croatia",          kickoff:"2026-06-17T20:00:00Z"},
+  {id:23, group:"L", team1:"Ghana",            team2:"Panama",           kickoff:"2026-06-17T23:00:00Z"},
+  {id:24, group:"K", team1:"Uzbekistan",       team2:"Colombia",         kickoff:"2026-06-18T02:00:00Z"},
+  {id:25, group:"A", team1:"Séc",             team2:"Nam Phi",          kickoff:"2026-06-18T16:00:00Z"},
+  {id:26, group:"B", team1:"Thụy Sĩ",         team2:"Bosnia & Herz.",   kickoff:"2026-06-18T19:00:00Z"},
+  {id:27, group:"B", team1:"Canada",           team2:"Qatar",            kickoff:"2026-06-18T22:00:00Z"},
+  {id:28, group:"A", team1:"Mê-hi-cô",        team2:"Hàn Quốc",         kickoff:"2026-06-19T03:00:00Z"},
+  {id:29, group:"D", team1:"Mỹ",             team2:"Úc",               kickoff:"2026-06-19T19:00:00Z"},
+  {id:30, group:"C", team1:"Scotland",         team2:"Ma-rốc",           kickoff:"2026-06-19T22:00:00Z"},
+  {id:31, group:"C", team1:"Brazil",           team2:"Haiti",            kickoff:"2026-06-20T01:00:00Z"},
+  {id:32, group:"D", team1:"Thổ Nhĩ Kỳ",      team2:"Paraguay",         kickoff:"2026-06-20T04:00:00Z"},
+  {id:33, group:"F", team1:"Hà Lan",          team2:"Thụy Điển",        kickoff:"2026-06-20T17:00:00Z"},
+  {id:34, group:"E", team1:"Đức",             team2:"Bờ Biển Ngà",      kickoff:"2026-06-20T20:00:00Z"},
+  {id:35, group:"E", team1:"Ecuador",          team2:"Curaçao",          kickoff:"2026-06-21T00:00:00Z"},
+  {id:36, group:"F", team1:"Tunisia",          team2:"Nhật Bản",         kickoff:"2026-06-21T04:00:00Z"},
+  {id:37, group:"H", team1:"Tây Ban Nha",      team2:"Ả Rập Xê-út",     kickoff:"2026-06-21T16:00:00Z"},
+  {id:38, group:"G", team1:"Bỉ",             team2:"Iran",             kickoff:"2026-06-21T19:00:00Z"},
+  {id:39, group:"H", team1:"Uruguay",          team2:"Cape Verde",       kickoff:"2026-06-21T22:00:00Z"},
+  {id:40, group:"G", team1:"New Zealand",      team2:"Ai Cập",           kickoff:"2026-06-22T01:00:00Z"},
+  {id:41, group:"J", team1:"Argentina",        team2:"Áo",              kickoff:"2026-06-22T17:00:00Z"},
+  {id:42, group:"I", team1:"Pháp",            team2:"Iraq",             kickoff:"2026-06-22T21:00:00Z"},
+  {id:43, group:"I", team1:"Na Uy",           team2:"Senegal",          kickoff:"2026-06-23T00:00:00Z"},
+  {id:44, group:"J", team1:"Jordan",           team2:"Algeria",          kickoff:"2026-06-23T03:00:00Z"},
+  {id:45, group:"K", team1:"Bồ Đào Nha",      team2:"Uzbekistan",       kickoff:"2026-06-23T17:00:00Z"},
+  {id:46, group:"L", team1:"Anh",             team2:"Ghana",            kickoff:"2026-06-23T20:00:00Z"},
+  {id:47, group:"L", team1:"Panama",           team2:"Croatia",          kickoff:"2026-06-23T23:00:00Z"},
+  {id:48, group:"K", team1:"Colombia",         team2:"Congo",            kickoff:"2026-06-24T02:00:00Z"},
+  {id:49, group:"B", team1:"Thụy Sĩ",         team2:"Canada",           kickoff:"2026-06-24T19:00:00Z"},
+  {id:50, group:"B", team1:"Bosnia & Herz.",   team2:"Qatar",            kickoff:"2026-06-24T19:00:00Z"},
+  {id:51, group:"C", team1:"Scotland",         team2:"Brazil",           kickoff:"2026-06-24T22:00:00Z"},
+  {id:52, group:"C", team1:"Ma-rốc",           team2:"Haiti",            kickoff:"2026-06-24T22:00:00Z"},
+  {id:53, group:"A", team1:"Séc",             team2:"Mê-hi-cô",         kickoff:"2026-06-25T01:00:00Z"},
+  {id:54, group:"A", team1:"Nam Phi",          team2:"Hàn Quốc",         kickoff:"2026-06-25T01:00:00Z"},
+  {id:55, group:"E", team1:"Ecuador",          team2:"Đức",             kickoff:"2026-06-25T20:00:00Z"},
+  {id:56, group:"E", team1:"Curaçao",          team2:"Bờ Biển Ngà",     kickoff:"2026-06-25T20:00:00Z"},
+  {id:57, group:"F", team1:"Nhật Bản",         team2:"Thụy Điển",        kickoff:"2026-06-25T23:00:00Z"},
+  {id:58, group:"F", team1:"Tunisia",          team2:"Hà Lan",           kickoff:"2026-06-25T23:00:00Z"},
+  {id:59, group:"D", team1:"Thổ Nhĩ Kỳ",      team2:"Mỹ",             kickoff:"2026-06-26T02:00:00Z"},
+  {id:60, group:"D", team1:"Paraguay",         team2:"Úc",              kickoff:"2026-06-26T02:00:00Z"},
+  {id:61, group:"I", team1:"Na Uy",           team2:"Pháp",            kickoff:"2026-06-26T19:00:00Z"},
+  {id:62, group:"I", team1:"Senegal",          team2:"Iraq",             kickoff:"2026-06-26T19:00:00Z"},
+  {id:63, group:"H", team1:"Cape Verde",       team2:"Ả Rập Xê-út",     kickoff:"2026-06-27T00:00:00Z"},
+  {id:64, group:"H", team1:"Uruguay",          team2:"Tây Ban Nha",      kickoff:"2026-06-27T00:00:00Z"},
+  {id:65, group:"G", team1:"Ai Cập",           team2:"Iran",             kickoff:"2026-06-27T03:00:00Z"},
+  {id:66, group:"G", team1:"New Zealand",      team2:"Bỉ",             kickoff:"2026-06-27T03:00:00Z"},
+  {id:67, group:"L", team1:"Panama",           team2:"Anh",             kickoff:"2026-06-27T21:00:00Z"},
+  {id:68, group:"L", team1:"Croatia",          team2:"Ghana",            kickoff:"2026-06-27T21:00:00Z"},
+  {id:69, group:"K", team1:"Colombia",         team2:"Bồ Đào Nha",      kickoff:"2026-06-27T23:30:00Z"},
+  {id:70, group:"K", team1:"Congo",            team2:"Uzbekistan",       kickoff:"2026-06-27T23:30:00Z"},
+  {id:71, group:"J", team1:"Algeria",          team2:"Áo",              kickoff:"2026-06-28T02:00:00Z"},
+  {id:72, group:"J", team1:"Jordan",           team2:"Argentina",        kickoff:"2026-06-28T02:00:00Z"},
+].map(m => ({...m, deadline: m.kickoff, date: (() => {
+  const d = new Date(new Date(m.kickoff).getTime() + 7*3600*1000);
+  return d.toISOString().slice(0,10);
+})()}));
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let db = null;
+let firebaseOK = false;
+let currentUser = null; // {id, name, approved}
+let isAdmin = false;
+let activeMatchId = null;
+let currentFilter = 'all';
+
+let users       = {};
+let predictions = {};
+let results     = {};
+let scores      = {};
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+async function hashPwd(pwd) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pwd));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function isLocked(m) { return new Date() >= new Date(m.kickoff); }
+function getPred(matchId, userId) { return predictions[matchId]?.[userId] || null; }
+function isUserActive(uid) { return Object.values(predictions).some(mp => mp?.[uid]); }
+function getEffectivePred(matchId, uid) {
+  const p = getPred(matchId, uid);
+  if (p) return p;
+  if (isLocked(MATCHES.find(m=>m.id===matchId)) && isUserActive(uid)) return DEFAULT_SCORE;
+  return null;
+}
+function fmtPts(n) {
+  const sign = n >= 0 ? '+' : '';
+  return sign + n.toLocaleString('vi-VN');
+}
+function fmtKickoffVN(utcStr) {
+  const d = new Date(new Date(utcStr).getTime() + 7*3600*1000);
+  const hh = String(d.getUTCHours()).padStart(2,'0');
+  const mm = String(d.getUTCMinutes()).padStart(2,'0');
+  const day = d.getUTCDate(), month = d.getUTCMonth()+1;
+  const days = ['CN','T2','T3','T4','T5','T6','T7'];
+  return `${days[d.getUTCDay()]} ${day}/${month} lúc ${hh}:${mm}`;
+}
+function fmtDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00+07:00');
+  return d.toLocaleDateString('vi-VN', {weekday:'short', day:'numeric', month:'numeric'});
+}
+
+// ══════════════════════════════════════════════
+//  FIREBASE
+// ══════════════════════════════════════════════
+function initFirebase() {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    firebaseOK = true;
+    db.ref(`${DB}/users`).on('value', s => { users = s.val() || {}; onDataUpdate(); });
+    db.ref(`${DB}/predictions`).on('value', s => { predictions = s.val() || {}; onDataUpdate(); });
+    db.ref(`${DB}/results`).on('value', s => { results = s.val() || {}; onDataUpdate(); });
+    db.ref(`${DB}/scores`).on('value', s => { scores = s.val() || {}; onDataUpdate(); });
+  } catch(e) { showToast('⚠️ Lỗi kết nối Firebase'); }
+}
+function onDataUpdate() {
+  renderPlayerPicker();
+  renderCurrentView();
+}
+async function fbSet(path, val) {
+  if (firebaseOK) await db.ref(path).set(val);
+}
+async function fbPush(path, val) {
+  if (firebaseOK) return db.ref(path).push(val);
+}
+
+// ══════════════════════════════════════════════
+//  AUTH – PLAYER PICKER
+// ══════════════════════════════════════════════
+function getInitials(name) {
+  const parts = name.trim().split(' ');
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return parts[parts.length - 1][0].toUpperCase();
+}
+
+function renderPlayerPicker() {
+  const grid = document.getElementById('player-grid');
+  if (!grid) return;
+
+  const approved = Object.entries(users).filter(([,u]) => u.approved && !u.rejected);
+  const pending  = Object.entries(users).filter(([,u]) => !u.approved && !u.rejected);
+
+  let html = approved.map(([uid, u]) => `
+    <div class="player-tile approved" onclick="openPwdModal('${uid}')">
+      <div class="avatar">${getInitials(u.name)}</div>
+      <div class="tile-name">${u.name}</div>
+      <div class="tile-status ok">▶ Vào chơi</div>
+    </div>
+  `).join('');
+
+  html += pending.map(([uid, u]) => `
+    <div class="player-tile pending">
+      <div class="avatar">⏳</div>
+      <div class="tile-name">${u.name}</div>
+      <div class="tile-status wait">Chờ duyệt</div>
+    </div>
+  `).join('');
+
+  html += `
+    <div class="register-tile" onclick="showRegister()">
+      <div class="plus">＋</div>
+      <div class="tile-name">Chưa có tài khoản</div>
+    </div>
+  `;
+
+  grid.innerHTML = html;
+}
+
+function showRegister() {
+  document.getElementById('picker-wrap').style.display = 'none';
+  document.getElementById('register-wrap').style.display = 'block';
+  document.getElementById('reg-name').focus();
+}
+
+function showPicker() {
+  document.getElementById('register-wrap').style.display = 'none';
+  document.getElementById('picker-wrap').style.display = 'block';
+}
+
+// Password modal
+let loginTargetUid = null;
+function openPwdModal(uid) {
+  const u = users[uid];
+  if (!u) return;
+  loginTargetUid = uid;
+  document.getElementById('pm-avatar').textContent = getInitials(u.name);
+  document.getElementById('pm-name').textContent = u.name;
+  document.getElementById('pwd-modal-input').value = '';
+  document.getElementById('pwd-error').textContent = '';
+  document.getElementById('pwd-modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('pwd-modal-input').focus(), 100);
+}
+function closePwdModal(e) {
+  if (e && e.type === 'click' && e.target !== document.getElementById('pwd-modal-overlay')) return;
+  document.getElementById('pwd-modal-overlay').classList.remove('open');
+  loginTargetUid = null;
+}
+async function doPwdLogin() {
+  if (!loginTargetUid) return;
+  const pwd = document.getElementById('pwd-modal-input').value;
+  if (!pwd) { document.getElementById('pwd-error').textContent = 'Vui lòng nhập mật khẩu'; return; }
+  const u = users[loginTargetUid];
+  const hash = await hashPwd(pwd);
+  if (hash !== u.pwHash) {
+    document.getElementById('pwd-error').textContent = '❌ Sai mật khẩu';
+    document.getElementById('pwd-modal-input').value = '';
+    document.getElementById('pwd-modal-input').focus();
+    return;
+  }
+  document.getElementById('pwd-modal-overlay').classList.remove('open');
+  currentUser = {id: loginTargetUid, name: u.name, approved: true};
+  localStorage.setItem('mg_userId', loginTargetUid);
+  enterApp();
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const pwd  = document.getElementById('reg-pwd').value;
+  const pwd2 = document.getElementById('reg-pwd2').value;
+  if (!name || name.length < 2) { showToast('Vui lòng nhập họ tên đầy đủ'); return; }
+  if (pwd.length < 4) { showToast('Mật khẩu tối thiểu 4 ký tự'); return; }
+  if (pwd !== pwd2) { showToast('Mật khẩu không khớp'); return; }
+  if (!firebaseOK) { showToast('⚠️ Chưa kết nối được Firebase. Kiểm tra mạng và thử lại.'); return; }
+  const existing = Object.values(users).find(u => u.name.toLowerCase() === name.toLowerCase());
+  if (existing) { showToast('Tên này đã được đăng ký rồi'); return; }
+
+  const btn = document.querySelector('#register-wrap .btn-primary');
+  btn.textContent = 'Đang gửi...'; btn.disabled = true;
+
+  try {
+    const pwHash = await hashPwd(pwd);
+    await fbPush(`${DB}/users`, {name, pwHash, approved: false, createdAt: Date.now()});
+    showToast('✅ Đã gửi! Chờ admin duyệt nhé');
+    document.getElementById('reg-name').value = '';
+    document.getElementById('reg-pwd').value = '';
+    document.getElementById('reg-pwd2').value = '';
+    showPicker();
+  } catch(e) {
+    showToast('❌ Lỗi: ' + (e.message || 'Không gửi được. Kiểm tra kết nối.'));
+    console.error(e);
+  } finally {
+    btn.textContent = '✅ Gửi đăng ký'; btn.disabled = false;
+  }
+}
+
+function enterApp() {
+  document.getElementById('user-badge').textContent = currentUser.name;
+  document.getElementById('user-badge').style.display = 'block';
+  document.getElementById('bottom-nav').classList.add('show');
+  showView('matches');
+}
+
+function logoutPrompt() {
+  if (confirm(`Đăng xuất tài khoản "${currentUser?.name}"?`)) {
+    currentUser = null;
+    localStorage.removeItem('mg_userId');
+    document.getElementById('user-badge').style.display = 'none';
+    document.getElementById('bottom-nav').classList.remove('show');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-auth').classList.add('active');
+    showPicker();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('#bottom-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + name)?.classList.add('active');
+  if (name === 'matches')     renderMatches();
+  if (name === 'leaderboard') renderLeaderboard();
+  if (name === 'admin')       renderAdminUsers();
+}
+function renderCurrentView() {
+  const a = document.querySelector('.view.active');
+  if (!a) return;
+  if (a.id === 'view-matches')     renderMatches();
+  if (a.id === 'view-leaderboard') renderLeaderboard();
+  if (a.id === 'view-admin' && isAdmin) { renderAdminUsers(); renderAdminPreds(); }
+}
+
+// ══════════════════════════════════════════════
+//  MATCHES
+// ══════════════════════════════════════════════
+function setFilter(el, f) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = f;
+  renderMatches();
+}
+function renderMatches() {
+  if (!currentUser) return;
+  let list = MATCHES;
+  if (currentFilter === 'open')    list = MATCHES.filter(m => !isLocked(m) && !results[m.id]);
+  if (currentFilter === 'pending') list = MATCHES.filter(m => !isLocked(m) && !getPred(m.id, currentUser.id));
+  if (currentFilter === 'done')    list = MATCHES.filter(m => results[m.id]);
+
+  const byDate = {};
+  list.forEach(m => { if (!byDate[m.date]) byDate[m.date]=[]; byDate[m.date].push(m); });
+
+  const el = document.getElementById('matches-list');
+  if (!list.length) { el.innerHTML = '<p class="empty-msg">Không có trận nào</p>'; return; }
+
+  el.innerHTML = Object.entries(byDate).map(([date, ms]) => `
+    <div class="date-label">${fmtDate(date)}</div>
+    ${ms.map(m => renderMatchCard(m)).join('')}
+  `).join('');
+}
+function renderMatchCard(m) {
+  const locked = isLocked(m);
+  const hasResult = results[m.id];
+  const myPred = getPred(m.id, currentUser.id);
+  const effPred = getEffectivePred(m.id, currentUser.id);
+  const approvedUsers = Object.entries(users).filter(([,u]) => u.approved && !u.rejected);
+  const predCount = approvedUsers.filter(([uid]) => getPred(m.id, uid)).length;
+  const approvedCount = approvedUsers.length;
+
+  let statusHtml, predHtml = '';
+
+  if (hasResult) {
+    statusHtml = `<span class="match-status done">${hasResult}</span>`;
+    if (effPred) {
+      const sc = scores[currentUser.id]?.[m.id];
+      const ok = sc ? (sc.correct===true || sc.points===PTS_CORRECT) : false;
+      const ptsTxt = sc ? `<span class="${ok?'ok':'no'}">${fmtPts(ok?PTS_CORRECT:PTS_WRONG)}đ</span>` : '';
+      predHtml = `<span class="my-pred">Tôi: <span class="sc">${effPred}</span> ${ptsTxt}${!myPred?' <em style="font-size:10px;color:var(--text2)">(auto)</em>':''}</span>`;
+    }
+  } else if (locked) {
+    statusHtml = `<span class="match-status locked">Hết giờ</span>`;
+    if (effPred) predHtml = `<span class="my-pred">Tôi: <span class="sc">${effPred}</span>${!myPred?' <em style="font-size:10px;color:var(--text2)">(auto)</em>':''}</span>`;
+  } else {
+    statusHtml = `<span class="match-status open">${fmtKickoffVN(m.kickoff)}</span>`;
+    predHtml = myPred
+      ? `<span class="my-pred">Tôi: <span class="sc">${myPred}</span></span>`
+      : `<span class="my-pred" style="color:var(--accent2)">Chưa đoán</span>`;
+  }
+
+  const predCountHtml = `<span class="pred-count" onclick="togglePreds(event,${m.id})">${predCount}/${approvedCount}</span>`;
+
+  // Danh sách tất cả người được duyệt, xanh = đã đoán, đỏ = chưa (chỉ khi trận còn mở)
+  const predListHtml = `<div class="predictor-list" id="plist-${m.id}" style="display:none">
+    ${approvedUsers.map(([uid, u]) => {
+      const hasPred = !!getPred(m.id, uid);
+      const isMe = uid === currentUser.id;
+      let chipClass = 'predictor-chip';
+      if (isMe) chipClass += ' me';
+      else if (hasPred) chipClass += ' done';
+      else if (!locked) chipClass += ' missing';
+      return `<span class="${chipClass}">${u.name}</span>`;
+    }).join('')}
+    ${approvedUsers.length===0?'<span style="color:var(--text2);font-size:12px">Chưa có ai</span>':''}
+  </div>`;
+
+  return `
+    <div class="match-card ${locked?'locked':''} ${hasResult?'has-result':''}" ${!locked?`onclick="openModal(${m.id})"`:''}>
+      <span class="group-badge">Bảng ${m.group}</span>
+      <div class="match-teams">
+        <span class="team-name left">${m.team1}</span>
+        <span class="vs">VS</span>
+        <span class="team-name right">${m.team2}</span>
+      </div>
+      <div class="match-meta">
+        ${statusHtml}
+        <div style="display:flex;align-items:center;gap:8px">${predCountHtml}${predHtml}</div>
+      </div>
+      ${predListHtml}
+    </div>
+  `;
+}
+function togglePreds(e, id) {
+  e.stopPropagation();
+  const el = document.getElementById('plist-' + id);
+  if (el) el.style.display = el.style.display==='none' ? 'flex' : 'none';
+}
+
+// ══════════════════════════════════════════════
+//  PREDICT MODAL
+// ══════════════════════════════════════════════
+function openModal(matchId) {
+  const m = MATCHES.find(x=>x.id===matchId);
+  if (!m || isLocked(m)) return;
+  activeMatchId = matchId;
+  document.getElementById('modal-title').textContent = `${m.team1} vs ${m.team2}`;
+  document.getElementById('modal-sub').textContent = `Bảng ${m.group} · ${fmtKickoffVN(m.kickoff)}`;
+  const ex = getPred(matchId, currentUser.id);
+  const [g1,g2] = ex ? ex.split('-') : ['0','0'];
+  document.getElementById('pred1').value = g1;
+  document.getElementById('pred2').value = g2;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e) {
+  if (e && e.type === 'click' && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  activeMatchId = null;
+}
+async function submitPred() {
+  if (!currentUser || !activeMatchId) return;
+  const m = MATCHES.find(x=>x.id===activeMatchId);
+  if (!m || isLocked(m)) return;
+  const s1 = parseInt(document.getElementById('pred1').value)||0;
+  const s2 = parseInt(document.getElementById('pred2').value)||0;
+  const score = `${s1}-${s2}`;
+  await fbSet(`${DB}/predictions/${activeMatchId}/${currentUser.id}`, score);
+  document.getElementById('modal-overlay').classList.remove('open');
+  activeMatchId = null;
+  showToast(`✅ Đã đoán ${score}`);
+  renderMatches();
+}
+
+// ══════════════════════════════════════════════
+//  LEADERBOARD
+// ══════════════════════════════════════════════
+function renderLeaderboard() {
+  const approved = Object.entries(users).filter(([,u]) => u.approved);
+  const lb = approved.map(([uid, u]) => {
+    let pts = 0, correct = 0, wrong = 0;
+    Object.entries(scores[uid] || {}).forEach(([, data]) => {
+      const ok = data.correct === true || data.points === PTS_CORRECT;
+      const bad = data.correct === false || data.points === PTS_WRONG;
+      if (ok)  { pts += PTS_CORRECT; correct++; }
+      if (bad) { pts += PTS_WRONG;   wrong++;   }
+    });
+    return {uid, name: u.name, pts, correct, wrong};
+  }).sort((a,b) => a.pts - b.pts); // âm nhiều nhất lên đầu
+
+  // Tổng
+  const total = lb.reduce((s, p) => s + p.pts, 0);
+  const totalEl = document.getElementById('total-pts');
+  totalEl.textContent = fmtPts(total) + 'đ';
+  totalEl.className = 'val ' + (total >= 0 ? 'pos' : 'neg');
+  document.getElementById('total-sub').textContent =
+    `${lb.length} người tham gia · ${lb.filter(p=>p.pts<0).length} mạnh thường quân`;
+
+  const crowns = ['👑','🥈','🥉'];
+  document.getElementById('lb-list').innerHTML = lb.length === 0
+    ? '<p class="empty-msg">Chưa có ai tham gia</p>'
+    : lb.map((p, i) => {
+      const isMe = p.uid === currentUser?.id;
+      const ptsClass = p.pts >= 0 ? 'pos' : 'neg';
+      return `
+        <div class="lb-card">
+          <div class="lb-rank r${i+1}">${i < 3 ? crowns[i] : i+1}</div>
+          <div style="flex:1">
+            <div class="lb-name">${p.name}${isMe?'<span class="me-badge">Bạn</span>':''}</div>
+            <div class="lb-sub">${p.correct} đúng · ${p.wrong} sai</div>
+          </div>
+          <div class="lb-pts ${ptsClass}">${fmtPts(p.pts)}đ</div>
+        </div>
+      `;
+    }).join('');
+}
+
+// ══════════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════════
+async function adminLogin() {
+  const pwd = document.getElementById('admin-pwd-input').value;
+  if (pwd !== ADMIN_PASSWORD) { showToast('Sai mật khẩu admin'); return; }
+  isAdmin = true;
+  document.getElementById('admin-login-wrap').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  renderAdminUsers();
+  renderAdminMatchSelect();
+}
+function renderAdminUsers() {
+  if (!isAdmin) return;
+  const pending  = Object.entries(users).filter(([,u]) => !u.approved && !u.rejected);
+  const approved = Object.entries(users).filter(([,u]) => u.approved);
+  let html = '';
+  if (pending.length) {
+    html += `<p style="font-size:12px;color:var(--accent2);font-weight:700;margin-bottom:8px">⏳ Chờ duyệt (${pending.length})</p>`;
+    html += pending.map(([uid,u]) => `
+      <div class="admin-user-row">
+        <span style="font-weight:700">${u.name}</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn-approve" onclick="approveUser('${uid}',true)">✅ Duyệt</button>
+          <button class="btn-danger"  onclick="approveUser('${uid}',false)">❌ Từ chối</button>
+        </div>
+      </div>`).join('');
+  }
+  if (approved.length) {
+    html += `<p style="font-size:12px;color:var(--text2);font-weight:700;margin:12px 0 8px">✅ Đã duyệt (${approved.length})</p>`;
+    html += approved.map(([uid,u]) => `
+      <div class="admin-user-row">
+        <span>${u.name}</span>
+        <button class="btn-danger" onclick="removeUser('${uid}')">Xoá</button>
+      </div>`).join('');
+  }
+  if (!html) html = '<p class="empty-msg" style="padding:20px 0">Không có tài khoản nào</p>';
+  document.getElementById('admin-users-list').innerHTML = html;
+}
+async function approveUser(uid, approve) {
+  await fbSet(`${DB}/users/${uid}/approved`, approve);
+  if (!approve) {
+    await fbSet(`${DB}/users/${uid}/rejected`, true);
+    showToast('Đã từ chối');
+  } else {
+    showToast('Đã duyệt – đang tính bù điểm...');
+    await backfillUser(uid);
+    showToast('Xong! Đã tính bù điểm các trận đã qua');
+  }
+}
+
+// Tính bù 5-5 cho 1 người với tất cả trận đã có kết quả (bỏ qua 2 trận đầu)
+const BACKFILL_SKIP_MATCHES = [1, 2]; // Mê-hi-cô vs Nam Phi, Hàn Quốc vs Séc
+async function backfillUser(uid) {
+  for (const [matchId, actual] of Object.entries(results)) {
+    if (BACKFILL_SKIP_MATCHES.includes(Number(matchId))) continue; // bỏ qua 2 trận đầu
+    if (scores[uid]?.[matchId]) continue; // đã có điểm rồi thì bỏ qua
+    const pred = getPred(matchId, uid) || DEFAULT_SCORE;
+    const ok = pred === actual;
+    const pts = ok ? PTS_CORRECT : PTS_WRONG;
+    await fbSet(`${DB}/scores/${uid}/${matchId}`, {predicted: pred, actual, correct: ok, points: pts});
+  }
+}
+
+// Tính lại TOÀN BỘ điểm cho tất cả user (ghi đè, bỏ qua trận 1 & 2)
+async function recalculateAll() {
+  if (!confirm('Tính lại toàn bộ điểm theo luật mới (+20.000 / -10.000)?\nTrận 1 & 2 sẽ bị bỏ qua.')) return;
+  const approved = Object.entries(users).filter(([,u]) => u.approved && !u.rejected);
+  if (!approved.length) { showToast('Chưa có ai được duyệt'); return; }
+  showToast('Đang tính lại...');
+  for (const [uid] of approved) {
+    // Xoá điểm trận 1 & 2 nếu có
+    for (const mid of BACKFILL_SKIP_MATCHES) {
+      await db.ref(`${DB}/scores/${uid}/${mid}`).remove();
+    }
+    // Tính lại tất cả trận đã có kết quả (ghi đè)
+    for (const [matchId, actual] of Object.entries(results)) {
+      if (BACKFILL_SKIP_MATCHES.includes(Number(matchId))) continue;
+      const pred = getPred(matchId, uid) || DEFAULT_SCORE;
+      const ok = pred === actual;
+      const pts = ok ? PTS_CORRECT : PTS_WRONG;
+      await fbSet(`${DB}/scores/${uid}/${matchId}`, {predicted: pred, actual, correct: ok, points: pts});
+    }
+  }
+  showToast('Xong! Đã tính lại cho ' + approved.length + ' người');
+}
+
+// Tính bù cho TẤT CẢ người được duyệt (chạy thủ công khi cần)
+async function backfillAll() {
+  const approved = Object.entries(users).filter(([,u]) => u.approved && !u.rejected);
+  if (!approved.length) { showToast('Chưa có ai được duyệt'); return; }
+  showToast('Đang tính bù điểm...');
+  for (const [uid] of approved) {
+    await backfillUser(uid);
+  }
+  showToast('Xong! Đã tính bù cho ' + approved.length + ' người');
+}
+async function removeUser(uid) {
+  if (!confirm('Xoá tài khoản này?')) return;
+  await db.ref(`${DB}/users/${uid}`).remove();
+  showToast('Đã xoá');
+}
+function renderAdminMatchSelect() {
+  if (!isAdmin) return;
+  document.getElementById('admin-match-select').innerHTML =
+    '<option value="">-- Chọn trận đấu --</option>' +
+    MATCHES.map(m => `<option value="${m.id}">[${m.group}] ${m.team1} vs ${m.team2} (${fmtDate(m.date)})${results[m.id]?' ✅':''}</option>`).join('');
+}
+function onAdminMatchSelect() {
+  const id = parseInt(document.getElementById('admin-match-select').value);
+  if (!id) return;
+  const m = MATCHES.find(x=>x.id===id);
+  document.getElementById('admin-team1').textContent = m.team1;
+  document.getElementById('admin-team2').textContent = m.team2;
+  if (results[id]) {
+    const [s1,s2] = results[id].split('-');
+    document.getElementById('admin-score1').value = s1;
+    document.getElementById('admin-score2').value = s2;
+  } else {
+    document.getElementById('admin-score1').value = 0;
+    document.getElementById('admin-score2').value = 0;
+  }
+  document.getElementById('admin-match-info').textContent =
+    `Bảng ${m.group} · ${fmtKickoffVN(m.kickoff)}`;
+  renderAdminPreds();
+}
+async function adminSaveResult() {
+  const id = parseInt(document.getElementById('admin-match-select').value);
+  if (!id) { showToast('Chọn trận trước'); return; }
+  const s1 = parseInt(document.getElementById('admin-score1').value)||0;
+  const s2 = parseInt(document.getElementById('admin-score2').value)||0;
+  const actual = `${s1}-${s2}`;
+  await fbSet(`${DB}/results/${id}`, actual);
+
+  const approved = Object.entries(users).filter(([,u]) => u.approved);
+  const items = [];
+  for (const [uid, u] of approved) {
+    if (!isUserActive(uid)) continue;
+    const pred = getEffectivePred(id, uid) || DEFAULT_SCORE;
+    const ok = pred === actual;
+    const pts = ok ? PTS_CORRECT : PTS_WRONG;
+    await fbSet(`${DB}/scores/${uid}/${id}`, {predicted: pred, actual, correct: ok, points: pts});
+    items.push({name: u.name, pred, ok, pts});
+  }
+
+  document.getElementById('admin-result-list').innerHTML = items.map(r => `
+    <div class="admin-result-item">
+      <span>${r.name}</span>
+      <span>${r.pred}</span>
+      <span class="pts-fmt ${r.ok?'pos':'neg'}">${fmtPts(r.pts)}đ</span>
+    </div>`).join('');
+
+  showToast(`✅ Đã lưu kết quả ${actual}`);
+  renderAdminMatchSelect();
+}
+function renderAdminPreds() {
+  if (!isAdmin) return;
+  const id = parseInt(document.getElementById('admin-match-select').value);
+  if (!id) return;
+  const m = MATCHES.find(x=>x.id===id);
+  const approved = Object.entries(users).filter(([,u]) => u.approved);
+  const html = approved.map(([uid, u]) => {
+    const pred = getEffectivePred(id, uid) || '—';
+    const isAuto = !getPred(id, uid) && isLocked(m);
+    const sc = scores[uid]?.[id];
+    const ok = sc && (sc.correct===true || sc.points===PTS_CORRECT);
+    const ptsTag = sc ? `<span class="pts-fmt ${ok?'pos':'neg'}">${fmtPts(ok?PTS_CORRECT:PTS_WRONG)}đ</span>` : '';
+    return `<div class="admin-result-item">
+      <span>${u.name}</span>
+      <span>${pred}${isAuto?' <em style="font-size:10px;color:var(--text2)">(auto)</em>':''}</span>
+      ${ptsTag}
+    </div>`;
+  }).join('');
+  document.getElementById('admin-preds-view').innerHTML =
+    `<p style="font-size:12px;color:var(--text2);margin-bottom:8px">Dự đoán của mọi người:</p>${html}`;
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  renderPlayerPicker(); // hiện ô đăng ký ngay, không chờ Firebase
+  initFirebase();
+
+  // Khôi phục session nếu đã đăng nhập trước đó
+  const uid = localStorage.getItem('mg_userId');
+  if (uid) {
+    setTimeout(() => {
+      if (!users[uid] || !users[uid].approved) return;
+      currentUser = {id: uid, name: users[uid].name, approved: true};
+      enterApp();
+    }, 1500);
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter') {
+    if (document.activeElement.id==='admin-pwd-input') adminLogin();
+    if (document.activeElement.id==='login-pwd') doLogin();
+    if (document.activeElement.id==='reg-pwd2') doRegister();
+  }
+});
+</script>
+</body>
+</html>
